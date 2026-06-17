@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الصلوات القبطية والكنائس التاريخية — LORD</title>
+<meta name="theme-color" content="#1a1208">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1208;--card:#241a0d;--deep:#120c05;
+  --gold:#d4af37;--gold-bright:#ffd700;--gold-dim:rgba(212,175,55,0.15);
+  --bordeaux:#7a2230;--bordeaux-dim:rgba(122,34,48,0.18);
+  --cream:#f0e6d2;--muted:#a8946a;--text:#f5ecd8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Cairo',sans-serif;background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(212,175,55,0.10) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 50% at 50% 110%,rgba(122,34,48,0.12) 0%,transparent 70%);
+  color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:24px 16px;
+}
+.app{width:100%;max-width:460px;animation:fadeUp 0.7s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.cross-top{text-align:center;margin-bottom:8px;}
+.cross-top svg{width:46px;height:46px;filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));animation:cross-glow 3s ease-in-out infinite;}
+@keyframes cross-glow{0%,100%{filter:drop-shadow(0 0 8px rgba(212,175,55,0.4));}50%{filter:drop-shadow(0 0 18px rgba(212,175,55,0.9));}}
+.header{text-align:center;margin-bottom:20px;position:relative;}
+.header::after{content:'';display:block;width:70px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:12px auto 0;}
+.waqf-label{font-size:11px;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px;font-weight:700;}
+.app-title{font-family:'Amiri',serif;font-size:26px;color:var(--gold-bright);font-weight:700;line-height:1.3;text-shadow:0 0 16px rgba(212,175,55,0.4);}
+.app-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.coptic-date{font-size:12px;color:#e89aa6;margin-top:6px;font-weight:600;}
+.sync-dot{display:inline-block;width:7px;height:7px;background:var(--gold);border-radius:50%;margin-left:5px;animation:pulse 2s infinite;vertical-align:middle;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+.method-selector-wrap{margin-bottom:14px;text-align:center;}
+.method-select{background:var(--card);color:var(--text);border:1px solid rgba(212,175,55,0.25);padding:9px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;width:100%;outline:none;transition:border-color 0.2s;}
+.method-select:focus{border-color:var(--gold);}
+.manual-pos-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.pos-input{background:var(--card);color:var(--text);border:1px solid rgba(212,175,55,0.25);padding:9px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;text-align:center;width:100%;}
+.pos-input:focus{border-color:var(--gold);}
+.pos-input::placeholder{color:var(--muted);font-size:11px;}
+.apply-pos-btn{background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.3);padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s;width:100%;}
+.apply-pos-btn:hover{background:rgba(212,175,55,0.25);}
+.pos-error{font-size:11px;color:#e58080;text-align:center;}
+.manual-location-info{font-size:12px;color:var(--gold-bright);text-align:center;background:var(--gold-dim);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:8px 12px;}
+.countdown-wrap{background:var(--deep);border:1px solid rgba(212,175,55,0.2);border-radius:18px;padding:20px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden;}
+.countdown-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(212,175,55,0.07),transparent);pointer-events:none;}
+.cd-label{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.05em;}
+.cd-prayer-name{font-family:'Amiri',serif;font-size:18px;color:var(--gold-bright);margin-bottom:4px;font-weight:700;}
+.cd-timer{font-size:40px;font-weight:700;color:var(--gold-bright);letter-spacing:4px;font-variant-numeric:tabular-nums;text-shadow:0 0 20px rgba(212,175,55,0.35);}
+.prayer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
+.p-item{background:var(--card);border-radius:12px;padding:11px 4px;text-align:center;border:1px solid rgba(255,255,255,0.03);transition:border-color .3s;}
+.p-item.active{border-color:var(--gold);background:linear-gradient(160deg,rgba(212,175,55,0.1),transparent);box-shadow:0 0 14px rgba(212,175,55,0.14);}
+.p-name{font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:600;font-family:'Amiri',serif;}
+.p-time{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.p-item.active .p-time{color:var(--gold-bright);}
+.maps-global{text-align:center;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.maps-global a{display:inline-flex;align-items:center;gap:6px;color:var(--gold-bright);font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(212,175,55,0.4);padding-bottom:2px;transition:color .2s;}
+.maps-global a:hover{color:var(--cream);}
+.sec-head{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gold-bright);border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:8px;margin-bottom:14px;font-weight:600;font-family:'Amiri',serif;}
+.historical-card{background:linear-gradient(135deg,var(--deep),var(--card));border:1px solid rgba(212,175,55,0.3);border-radius:14px;padding:16px;margin-bottom:24px;position:relative;overflow:hidden;}
+.historical-card::after{content:'☦';position:absolute;top:-8px;left:-8px;font-size:60px;color:rgba(212,175,55,0.06);}
+.hist-title{font-size:14px;font-weight:700;color:var(--gold-bright);margin-bottom:4px;}
+.hist-meta{font-size:12px;color:var(--text);margin-bottom:10px;display:flex;justify-content:space-between;}
+.hist-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.mosque-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.mosque-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;transition:transform .15s,border-color .25s;}
+.mosque-item:hover{transform:translateY(-1px);border-color:rgba(212,175,55,0.35);}
+.m-rank{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bordeaux-dim);color:#e89aa6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.m-info{flex:1;min-width:0;}
+.m-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-dist{font-size:11px;color:var(--gold-bright);margin-top:2px;}
+.m-state{font-size:12px;color:var(--muted);text-align:center;padding:16px;}
+.load-more-btn{width:100%;padding:10px;border-radius:10px;background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.25);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s;}
+.load-more-btn:hover{background:rgba(212,175,55,0.25);}
+.btn-map{flex-shrink:0;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.25);transition:background .2s;white-space:nowrap;}
+.btn-map:hover{background:rgba(212,175,55,0.25);}
+.btn-map.gold{background:var(--gold);color:#1a1208;border:none;box-shadow:0 2px 8px rgba(212,175,55,0.25);}
+.qibla-wrap{text-align:center;margin-bottom:24px;}
+.qibla-t{font-size:14px;font-weight:600;margin-bottom:2px;font-family:'Amiri',serif;color:var(--gold-bright);}
+.qibla-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.compass{width:130px;height:130px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 10px;position:relative;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle,rgba(212,175,55,0.06),transparent 70%);box-shadow:0 0 24px rgba(212,175,55,0.12);}
+.compass-labels{position:absolute;inset:0;pointer-events:none;}
+.compass-labels span{position:absolute;font-size:9px;color:var(--muted);font-weight:600;}
+.lbl-n{top:5px;left:50%;transform:translateX(-50%);}
+.lbl-s{bottom:5px;left:50%;transform:translateX(-50%);}
+.lbl-e{left:7px;top:50%;transform:translateY(-50%);color:var(--gold-bright);font-weight:700;}
+.lbl-w{right:7px;top:50%;transform:translateY(-50%);}
+.needle{width:2px;height:50px;position:absolute;bottom:50%;left:50%;transform-origin:bottom center;transform:translateX(-50%) rotate(0deg);transition:transform 0.6s cubic-bezier(.4,0,.2,1);}
+.needle-body{width:100%;height:100%;background:linear-gradient(to bottom,var(--gold-bright),rgba(212,175,55,0.3));border-radius:2px 2px 0 0;}
+.needle-tip{font-size:14px;position:absolute;top:-14px;left:50%;transform:translateX(-50%);color:var(--gold-bright);}
+.center-dot{width:10px;height:10px;background:var(--bordeaux);border-radius:50%;position:absolute;z-index:2;}
+.qibla-deg{font-size:13px;color:var(--gold-bright);font-weight:700;margin-bottom:14px;}
+.gps-bar{display:flex;justify-content:center;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid rgba(212,175,55,0.18);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--gold-bright);}
+.footer{text-align:center;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.15);text-transform:uppercase;padding:20px 0 10px;}
+.footer-cross{color:rgba(212,175,55,0.3);font-size:14px;margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="cross-top">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round">
+        <line x1="24" y1="6" x2="24" y2="42"/><line x1="6" y1="24" x2="42" y2="24"/>
+        <line x1="19" y1="11" x2="29" y2="11"/><line x1="19" y1="37" x2="29" y2="37"/>
+        <line x1="11" y1="19" x2="11" y2="29"/><line x1="37" y1="19" x2="37" y2="29"/>
+      </g>
+      <circle cx="24" cy="24" r="4" fill="none" stroke="#ffd700" stroke-width="2"/>
+    </svg>
+  </div>
+  <div class="header">
+    <div class="waqf-label">وقف محبة لكنائس مصر العريقة</div>
+    <div class="app-title">السبع صلوات القبطية</div>
+    <div class="app-sub">الأجبية · الكنائس · المعالم التاريخية</div>
+    <div class="coptic-date" id="coptic-date">التقويم القبطي</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--gold-bright)"><span class="sync-dot"></span> رصد ذكي للموقع بالـ GPS</div>
+  </div>
+  <div class="method-selector-wrap">
+    <select id="pos-mode-select" class="method-select">
+      <option value="auto" selected>📡 الموقع التلقائي (GPS)</option>
+      <option value="manual">✏️ إدخال يدوي للإحداثيات</option>
+    </select>
+  </div>
+  <div id="manual-pos-panel" class="manual-pos-wrap" style="display:none;">
+    <input type="text" id="manual-coords" class="pos-input" placeholder="مثال: 30.044420, 31.235712" dir="ltr" autocomplete="off">
+    <button id="apply-pos-btn" class="apply-pos-btn">تطبيق الموقع ✓</button>
+    <div id="pos-error" class="pos-error" style="display:none;"></div>
+    <div id="manual-location-info" class="manual-location-info" style="display:none;"></div>
+  </div>
+  <div class="countdown-wrap">
+    <div class="cd-label">الوقت المتبقي للصلاة القادمة</div>
+    <div class="cd-prayer-name" id="next-prayer-name">--</div>
+    <div class="cd-timer" id="cd-timer">00:00:00</div>
+  </div>
+  <div class="prayer-grid" id="prayer-grid"></div>
+  <div class="prayer-grid" id="prayer-grid2" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;"></div>
+  <div class="maps-global"><a id="global-maps-link" href="#" target="_blank">☦ أقرب كنيسة إليكم الآن (خرائط Google)</a></div>
+  <div class="sec-head"><span>⛪</span><span>أقرب كنيسة أو دير تاريخي</span></div>
+  <div class="historical-card" id="historical-card">
+    <div class="hist-title" id="hist-name">جاري رصد المعالم التاريخية...</div>
+    <div class="hist-meta"><span id="hist-age" style="color:var(--gold-bright);font-weight:600;">العمر: --</span><span id="hist-city" style="color:var(--muted);">المدينة: --</span></div>
+    <div class="hist-desc" id="hist-desc">سيظهر هنا أقرب كنيسة أو دير قبطي تاريخي.</div>
+    <a id="hist-map-btn" href="#" target="_blank" class="btn-map gold" style="display:inline-block;text-align:center;">🗺️ وجهني لأقرب معلم تاريخي</a>
+  </div>
+  <div class="sec-head"><span>☦</span><span id="zone-title">أقرب الكنائس إليكم</span></div>
+  <div class="mosque-list" id="mosque-list"></div>
+  <div class="sec-head"><span>🧭</span><span>اتجاه الصلاة (الشرق)</span></div>
+  <div class="qibla-wrap">
+    <div class="qibla-t">نحو الشرق</div>
+    <div class="qibla-sub">يصلي الأقباط نحو الشروق رمزاً للمسيح شمس البر</div>
+    <div class="compass">
+      <div class="compass-labels"><span class="lbl-n">ش</span><span class="lbl-s">ج</span><span class="lbl-e">شرق</span><span class="lbl-w">غ</span></div>
+      <div class="needle" id="needle"><div class="needle-body"></div><div class="needle-tip">☦</div></div>
+      <div class="center-dot"></div>
+    </div>
+    <div class="qibla-deg" id="qibla-deg">90° شرقاً</div>
+    <div class="gps-bar"><span>📡</span><span id="gps-txt">يرجى تفعيل GPS لتحديد موقعكم</span></div>
+  </div>
+  <div class="footer"><div class="footer-cross">☦ ✝ ☦</div>SYSTEM MANAGER · LORD · الكنيسة القبطية الأرثوذكسية</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+const d2r=d=>d*Math.PI/180,r2d=r=>r*180/Math.PI,fixHour=h=>h-24*Math.floor(h/24),fixAngle=a=>a-360*Math.floor(a/360);
+let currentLat=null,currentLng=null,countdownInterval=null,gpsWatchId=null,updateTimesInterval=null;
+const GPS_ACC=100,GPS_AGE=30000,GPS_DIST=0.05,GPS_OPT={enableHighAccuracy:true,timeout:20000,maximumAge:0};
+let mosqueSearchSeq=0,appLocationSeq=0;
+const RADII=[1,3,5,10,15,25];
+const COPTIC_HOURS=[
+  {name:'باكر',type:'sunrise',icon:'🌅'},{name:'الثالثة',type:'fixed',h:9,icon:'☀️'},
+  {name:'السادسة',type:'fixed',h:12,icon:'🌤️'},{name:'التاسعة',type:'fixed',h:15,icon:'⛅'},
+  {name:'الغروب',type:'sunset',icon:'🌇'},{name:'النوم',type:'fixed',h:21,icon:'🌙'},
+  {name:'نصف الليل',type:'fixed',h:0,icon:'✨'},
+];
+const historicalDB=[
+  {name:'الكنيسة المعلقة',city:'القاهرة (مصر القديمة)',lat:30.005402,lon:31.230148,age:1700,desc:'الكنيسة المعلقة (كنيسة السيدة العذراء مريم) من أقدم كنائس مصر، بُنيت فوق بقايا حصن بابليون. تعود أصولها إلى القرن الثالث أو الرابع الميلادي وتُعد درّة الفن القبطي.'},
+  {name:'كنيسة أبو سرجة',city:'القاهرة (مصر القديمة)',lat:30.006130,lon:31.231300,age:1600,desc:'كنيسة القديسين سرجيوس وواخس، يُعتقد أنها بُنيت فوق المغارة التي آوت العائلة المقدسة أثناء رحلتها إلى مصر. من أعرق الكنائس القبطية الأرثوذكسية.'},
+  {name:'كنيسة القديسة بربارة',city:'القاهرة (مصر القديمة)',lat:30.005800,lon:31.231900,age:1500,desc:'كنيسة أثرية في مجمع مصر القديمة، تتميز بحاجزها الخشبي المطعّم بالعاج وأيقوناتها النادرة.'},
+  {name:'دير الأنبا أنطونيوس',city:'البحر الأحمر',lat:28.916111,lon:32.354722,age:1670,desc:'أقدم دير مسيحي عامر في العالم، أسسه أتباع القديس أنطونيوس الكبير أبو الرهبنة. يقع عند سفح جبال الجلالة قرب البحر الأحمر.'},
+  {name:'دير الأنبا بولا',city:'البحر الأحمر',lat:28.846667,lon:32.551944,age:1650,desc:'دير القديس بولا أول السوّاح، من أقدم الأديرة في العالم. يقع في صحراء البحر الأحمر ويضم مغارة القديس بولا.'},
+  {name:'الدير الأحمر',city:'سوهاج',lat:26.520556,lon:31.661944,age:1550,desc:'دير الأنبا بيشاي (الدير الأحمر) قرب سوهاج، سُمّي لاستخدام الطوب الأحمر في بنائه. من روائع العمارة القبطية القديمة.'},
+  {name:'الدير الأبيض',city:'سوهاج',lat:26.547500,lon:31.629167,age:1586,desc:'دير الأنبا شنودة (الدير الأبيض)، أسسه الأنبا شنودة رئيس المتوحدين. بُني من الحجر الجيري الأبيض ويُعد معلماً بارزاً للرهبنة القبطية.'},
+  {name:'دير القديسة كاترين',city:'سيناء',lat:28.555800,lon:33.975800,age:1478,desc:'دير سانت كاترين عند سفح جبل موسى بسيناء، من أقدم الأديرة المسيحية العاملة، ومدرج ضمن مواقع التراث العالمي لليونسكو.'},
+  {name:'دير المحرق',city:'أسيوط',lat:27.533056,lon:30.893889,age:1600,desc:'دير السيدة العذراء (المحرق) بجبل قسقام، يُعتقد أن العائلة المقدسة أقامت فيه ستة أشهر. من أهم محطات رحلة العائلة المقدسة.'},
+  {name:'دير الأنبا بيشوي',city:'وادي النطرون',lat:30.354722,lon:30.350556,age:1650,desc:'أحد أديرة وادي النطرون العامرة، يضم جسد الأنبا بيشوي. مركز رهباني مهم في برية شيهيت.'},
+  {name:'دير السريان',city:'وادي النطرون',lat:30.351389,lon:30.343611,age:1500,desc:'دير السيدة العذراء (السريان) بوادي النطرون، اشتهر بمكتبته ومخطوطاته النادرة وفنونه الجدارية.'},
+];
+function showNotif(text,changed){Toastify({text,duration:4000,gravity:'bottom',position:'right',stopOnFocus:false,style:{background:changed?'rgba(212,175,55,0.92)':'rgba(40,28,12,0.95)',color:changed?'#1a1208':'#a8946a',border:changed?'1px solid #d4af37':'1px solid rgba(168,148,106,0.3)',borderRadius:'10px',fontFamily:"'Cairo',sans-serif",fontSize:'13px',fontWeight:'600',padding:'10px 16px',direction:'rtl'}}).showToast();}
+function sunPosition(jd){const D=jd-2451545.0;const g=fixAngle(357.529+0.98560028*D);const q=fixAngle(280.459+0.98564736*D);const L=fixAngle(q+1.915*Math.sin(d2r(g))+0.020*Math.sin(d2r(2*g)));const e=23.439-0.00000036*D;const RA=r2d(Math.atan2(Math.cos(d2r(e))*Math.sin(d2r(L)),Math.cos(d2r(L))))/15;const dec=r2d(Math.asin(Math.sin(d2r(e))*Math.sin(d2r(L))));const EqT=q/15-fixHour(RA);return{dec,EqT};}
+function julianDate(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100);const B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+function computeHours(lat,lng,tz,date=new Date()){const y=date.getFullYear(),m=date.getMonth()+1,d=date.getDate();const jd=julianDate(y,m,d);const{dec,EqT}=sunPosition(jd);const Dhuhr=12+tz-lng/15-EqT;function ha(alpha,dir){const latR=d2r(lat),decR=d2r(dec);const cosH=(Math.sin(d2r(alpha))-Math.sin(latR)*Math.sin(decR))/(Math.cos(latR)*Math.cos(decR));if(cosH>1||cosH<-1)return null;const h=r2d(Math.acos(cosH))/15;return dir==='rise'?Dhuhr-h:Dhuhr+h;}const sunrise=ha(-0.833,'rise'),sunset=ha(-0.833,'set');return COPTIC_HOURS.map(o=>{let t;if(o.type==='sunrise')t=sunrise;else if(o.type==='sunset')t=sunset;else t=o.h;return{name:o.name,icon:o.icon,time:t,fmt:fmtH(t)};});}
+function fmtH(h){if(h===null||isNaN(h))return'--:--';h=fixHour(h);let mTotal=Math.round((h-Math.floor(h))*60);let hr=Math.floor(h),mn=mTotal;if(mn===60){mn=0;hr=(hr+1)%24;}return String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0');}
+function getCopticDate(){const months=['توت','بابه','هاتور','كيهك','طوبة','أمشير','برمهات','برمودة','بشنس','بؤونة','أبيب','مسرى','النسيء'];const now=new Date();const gYear=now.getFullYear();const newYear=new Date(gYear,8,11);let copticYear=gYear-284,diff;if(now>=newYear){diff=Math.floor((now-newYear)/(1000*60*60*24));}else{const prevNY=new Date(gYear-1,8,11);diff=Math.floor((now-prevNY)/(1000*60*60*24));copticYear=gYear-1-284;}const monthIdx=Math.floor(diff/30);const day=(diff%30)+1;return `${day} ${months[Math.min(monthIdx,12)]} ${copticYear} ش`;}
+function renderHours(hours,nowH){const g1=document.getElementById('prayer-grid'),g2=document.getElementById('prayer-grid2');g1.innerHTML='';g2.innerHTML='';let nextIdx=-1;for(let i=0;i<hours.length;i++){if(hours[i].time!==null&&fixHour(hours[i].time)>nowH){nextIdx=i;break;}}if(nextIdx===-1)nextIdx=0;hours.forEach((p,i)=>{const div=document.createElement('div');div.className='p-item'+(i===nextIdx?' active':'');div.innerHTML=`<div class="p-name">${p.icon} ${p.name}</div><div class="p-time">${p.fmt}</div>`;(i<4?g1:g2).appendChild(div);});return nextIdx;}
+function startCountdown(hours){if(countdownInterval)clearInterval(countdownInterval);const timer=document.getElementById('cd-timer'),nameEl=document.getElementById('next-prayer-name');function tick(){const now=new Date();const nowH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;let idx=-1;for(let i=0;i<hours.length;i++){if(hours[i].time!==null&&fixHour(hours[i].time)>nowH){idx=i;break;}}let nextDay=false;if(idx===-1){idx=0;nextDay=true;}const next=hours[idx];if(!next||next.time===null){timer.textContent='--:--:--';return;}nameEl.textContent='صلاة '+next.name+(nextDay?' (غداً)':'');let diff=fixHour(next.time)-nowH;if(nextDay)diff=(24-nowH)+fixHour(next.time);const totalSec=Math.max(0,Math.floor(diff*3600));const hrs=Math.floor(totalSec/3600),mins=Math.floor((totalSec%3600)/60),secs=totalSec%60;timer.textContent=String(hrs).padStart(2,'0')+':'+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');}tick();countdownInterval=setInterval(tick,1000);}
+function haversineKm(a,b,c,e){const R=6371,dL=d2r(c-a),dO=d2r(e-b),x=Math.sin(dL/2)**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function mosqueState(msg){const l=document.getElementById('mosque-list');l.innerHTML='';const d=document.createElement('div');d.className='m-state';d.textContent=msg;l.appendChild(d);}
+function renderChurches(items,radiusKm,shown=5,placeLabel='',onExpand=null){const sfx=placeLabel?` - ${placeLabel}`:'';document.getElementById('zone-title').textContent=`أقرب الكنائس${sfx} (ضمن ${radiusKm} كم)`;const list=document.getElementById('mosque-list');list.innerHTML='';items.slice(0,shown).forEach((m,i)=>{const item=document.createElement('div');item.className='mosque-item';const rank=document.createElement('div');rank.className='m-rank';rank.textContent=i+1;const info=document.createElement('div');info.className='m-info';const nm=document.createElement('div');nm.className='m-name';nm.textContent=m.name;const ds=document.createElement('div');ds.className='m-dist';ds.textContent=`📍 ${m.dist.toFixed(1)} كم`;info.append(nm,ds);const btn=document.createElement('a');btn.className='btn-map';btn.target='_blank';btn.rel='noopener';btn.href=`https://www.google.com/maps/search/?api=1&query=${m.lat}%2C${m.lon}`;btn.textContent='الخريطة 📍';item.append(rank,info,btn);list.appendChild(item);});if(shown<items.length){const rem=items.length-shown;const more=document.createElement('button');more.className='load-more-btn';more.textContent=`عرض 5 كنائس أخرى ··· ${rem} متبقية`;more.onclick=()=>renderChurches(items,radiusKm,shown+5,placeLabel,onExpand);list.appendChild(more);}else if(onExpand){const more=document.createElement('button');more.className='load-more-btn';more.textContent='توسيع نطاق البحث عن كنائس أخرى';more.onclick=onExpand;list.appendChild(more);}}
+function setHistPlaceholder(msg){const btn=document.getElementById('hist-map-btn');document.getElementById('hist-name').innerText=msg;document.getElementById('hist-age').innerText='العمر: --';document.getElementById('hist-city').innerText='المدينة: --';document.getElementById('hist-desc').innerText='سيظهر هنا أقرب كنيسة أو دير قبطي تاريخي بعد تحديد GPS.';btn.removeAttribute('href');btn.style.pointerEvents='none';btn.style.opacity='0.55';}
+function viewbox(lat,lon,r){const lD=r/111.32,oD=r/(111.32*Math.max(Math.cos(d2r(lat)),0.1));return`${(lon-oD).toFixed(5)},${(lat-lD).toFixed(5)},${(lon+oD).toFixed(5)},${(lat+lD).toFixed(5)}`;}
+async function fetchChurches(lat,lon,r,ctrl){const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&amenity=place_of_worship&viewbox=${viewbox(lat,lon,r)}&bounded=1&limit=50&accept-language=ar`;const res=await fetch(url,{signal:ctrl.signal});if(!res.ok)throw new Error('err');return res.json();}
+async function reverseGeocode(lat,lon){try{const res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);if(!res.ok)throw new Error('');const d=await res.json();if(d&&d.address){const city=d.address.city||d.address.town||d.address.village||d.address.state||'';const state=d.address.state||'';const country=d.address.country||'';return{city,state,country};}}catch(e){}return{city:'',state:'',country:''};}
+function fmtPlace(g){if(!g)return'';return[...new Set([g.city,g.state,g.country].filter(Boolean))].join('، ');}
+async function findChurches(lat,lon,geoSource=null){const seq=++mosqueSearchSeq;mosqueState('جاري البحث عن أقرب الكنائس...');const geo=geoSource?await geoSource:await reverseGeocode(lat,lon);if(seq!==mosqueSearchSeq)return;const label=fmtPlace(geo);const NON_CHURCH=['mosque','مسجد','جامع','مصلى','synagogue','كنيس يهودي','معبد يهودي','temple','معبد','هندوس','بوذي','سيخ','بوذية'];const norm=places=>places.map(p=>{const mL=parseFloat(p.lat),mO=parseFloat(p.lon);const n=p.name||(p.display_name&&p.display_name.split(',')[0].trim())||'كنيسة';return{name:n,lat:mL,lon:mO,dist:haversineKm(lat,lon,mL,mO)};}).filter(m=>{const n=m.name.toLowerCase();if(NON_CHURCH.some(kw=>n.includes(kw)))return false;return true;}).sort((a,b)=>a.dist-b.dist);async function tryR(idx,req=true){const r=RADII[idx];if(!r)return false;mosqueState(`جاري البحث ضمن ${r} كم...`);let payload,t=null;try{const ctrl=new AbortController();t=setTimeout(()=>ctrl.abort(),12000);payload=await fetchChurches(lat,lon,r,ctrl);}catch(e){if(seq!==mosqueSearchSeq)return true;mosqueState('تعذّر الاتصال بالخوادم، حاول لاحقاً.');return true;}finally{if(t)clearTimeout(t);}if(seq!==mosqueSearchSeq)return true;const items=norm(payload||[]).filter(m=>m.dist<=r);if(!items.length){if(req)return false;mosqueState(`لم يتم العثور على كنائس ضمن ${r} كم.`);return true;}const hasNext=idx<RADII.length-1;renderChurches(items,r,5,label,hasNext?()=>tryR(idx+1,false):null);return true;}for(let i=0;i<RADII.length;i++){if(await tryR(i))return;}mosqueState('لم يتم العثور على كنائس في هذه المنطقة.');}
+function updateHistorical(lat,lng){const match=historicalDB.filter(m=>Number.isFinite(m.lat)&&Number.isFinite(m.lon)).map(m=>({...m,dist:haversineKm(lat,lng,m.lat,m.lon)})).sort((a,b)=>a.dist-b.dist)[0];if(!match){setHistPlaceholder('لا توجد إحداثيات مؤكدة');return;}document.getElementById('hist-name').innerText=match.name;document.getElementById('hist-age').innerText=`العمر: ${match.age} سنة`;document.getElementById('hist-city').innerText=`${match.city} · ${match.dist.toFixed(1)} كم`;document.getElementById('hist-desc').innerText=match.desc;const btn=document.getElementById('hist-map-btn');btn.href=`https://www.google.com/maps/search/?api=1&query=${match.lat},${match.lon}`;btn.style.pointerEvents='';btn.style.opacity='';}
+function initApp(lat,lng){const seq=++appLocationSeq;currentLat=lat;currentLng=lng;const isManual=document.getElementById('pos-mode-select').value==='manual';document.getElementById('gps-txt').innerText=isManual?`موقع يدوي: ${lat.toFixed(4)}, ${lng.toFixed(4)}`:`GPS نشط: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;document.getElementById('global-maps-link').href=`https://www.google.com/maps/search/?api=1&query=church&center=${lat},${lng}`;document.getElementById('qibla-deg').innerText='90° شرقاً';document.getElementById('needle').style.transform='translateX(-50%) rotate(90deg)';const updateTimes=()=>{const tz=-new Date().getTimezoneOffset()/60;const now=new Date();const nowH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;const hours=computeHours(currentLat,currentLng,tz,now);renderHours(hours,nowH);startCountdown(hours);};updateTimes();if(updateTimesInterval)clearInterval(updateTimesInterval);updateTimesInterval=setInterval(updateTimes,60000);const geoPromise=reverseGeocode(lat,lng);findChurches(lat,lng,geoPromise);geoPromise.then(geo=>{if(seq!==appLocationSeq)return;updateHistorical(lat,lng);if(document.getElementById('pos-mode-select').value==='manual'){const info=document.getElementById('manual-location-info');const parts=[geo.city,geo.state,geo.country].filter(Boolean);if(parts.length){info.textContent='📍 '+parts.join('، ');info.style.display='block';}else info.style.display='none';}});}
+function isGoodGps(p){if(!p||!p.coords)return false;const acc=p.coords.accuracy;if(!Number.isFinite(acc)||acc>GPS_ACC)return false;const age=Number.isFinite(p.timestamp)?Math.max(0,Date.now()-p.timestamp):Infinity;return age<=GPS_AGE;}
+function applyGps(pos,notify=true){const{latitude:nl,longitude:no,accuracy:acc}=pos.coords;const at=Number.isFinite(acc)?`${Math.round(acc)}م`:'?';const has=Number.isFinite(currentLat)&&Number.isFinite(currentLng);const dist=has?haversineKm(currentLat,currentLng,nl,no):Infinity;if(!has||dist>GPS_DIST){initApp(nl,no);if(has&&notify)showNotif(`📍 موقع جديد: ${nl.toFixed(4)}, ${no.toFixed(4)} · دقة ${at}`,true);return true;}return false;}
+window.onload=function(){document.getElementById('coptic-date').innerText=getCopticDate();const sel=document.getElementById('pos-mode-select'),panel=document.getElementById('manual-pos-panel'),btn=document.getElementById('apply-pos-btn'),err=document.getElementById('pos-error');function startGPS(){if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}currentLat=null;currentLng=null;document.getElementById('gps-txt').textContent='📡 جاري تحديد موقعك...';mosqueState('في انتظار إحداثيات GPS دقيقة...');if(!navigator.geolocation){document.getElementById('gps-txt').textContent='⚠️ المتصفح لا يدعم تحديد الموقع';mosqueState('⚠️ المتصفح لا يدعم GPS');return;}let init=false;gpsWatchId=navigator.geolocation.watchPosition(pos=>{if(!isGoodGps(pos)){const acc=pos.coords?Math.round(pos.coords.accuracy):'?';document.getElementById('gps-txt').textContent=`📡 انتظار إشارة دقيقة... (${acc}م)`;if(!init)mosqueState('في انتظار إشارة GPS دقيقة...');return;}applyGps(pos,init);init=true;},err2=>{const msgs={1:'⚠️ لم يُمنح إذن الموقع — فعّل الموقع في المتصفح',2:'⚠️ تعذّر تحديد الموقع',3:'⚠️ انتهت مهلة GPS'};const msg=(err2&&msgs[err2.code])||'⚠️ فشل تحديد الموقع';document.getElementById('gps-txt').textContent=msg;mosqueState(msg);if(err2&&err2.code===1&&gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}},GPS_OPT);}function applyManual(){const raw=document.getElementById('manual-coords').value.trim();err.style.display='none';const parts=raw.split(',');const lat=parseFloat(parts[0]),lon=parseFloat(parts[1]);if(parts.length<2||isNaN(lat)||lat<-90||lat>90||isNaN(lon)||lon<-180||lon>180){err.textContent='إحداثيات غير صحيحة — مثال: 30.044420, 31.235712';err.style.display='block';return;}initApp(lat,lon);}sel.onchange=function(){if(this.value==='manual'){if(Number.isFinite(currentLat)&&Number.isFinite(currentLng))document.getElementById('manual-coords').value=`${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;panel.style.display='flex';if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}}else{panel.style.display='none';document.getElementById('manual-location-info').style.display='none';startGPS();}};btn.onclick=applyManual;document.getElementById('manual-coords').addEventListener('keydown',e=>{if(e.key==='Enter')applyManual();});startGPS();};
+</script>
+</body>
+</html>
