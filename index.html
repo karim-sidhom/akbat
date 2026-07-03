@@ -1,1410 +1,215 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مواقيت الصلاة والمساجد التاريخية - LORD</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0b1e1a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="مواقيت">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --bg:        #0b1e1a;
-            --card:      #0e2820;
-            --deep:      #081612;
-            --gold:      #d4a017;
-            --gold-dim:  rgba(212,160,23,0.15);
-            --teal:      #13b4a0;
-            --teal-dim:  rgba(19,180,160,0.12);
-            --muted:     #7a9e96;
-            --text:      #e8f4f1;
-        }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(19,180,160,0.08) 0%, transparent 70%);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 24px 16px;
-        }
-        .app { width: 100%; max-width: 460px; animation: fadeUp 0.7s ease both; }
-        @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
-        .header { text-align: center; margin-bottom: 20px; position: relative; }
-        .header::after { content: ''; display: block; width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 12px auto 0; }
-        .waqf-label { font-size: 11px; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
-        .app-title { font-family: 'Amiri', serif; font-size: 28px; color: var(--teal); font-weight: 700; line-height: 1.2; }
-        .hijri { font-size: 12px; color: var(--muted); margin-top: 6px; }
-        .sync-dot { display: inline-block; width: 7px; height: 7px; background: var(--teal); border-radius: 50%; margin-left: 5px; animation: pulse 2s infinite; vertical-align: middle; }
-        @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(1.4); } }
-        
-        .method-selector-wrap { margin-bottom: 18px; text-align: center; }
-        .method-select { background: var(--card); color: var(--text); border: 1px solid rgba(212,160,23,0.25); padding: 8px 12px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 12px; width: 100%; outline: none; transition: border-color 0.2s; }
-        .method-select:focus { border-color: var(--teal); }
-        .manual-pos-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .pos-input { background: var(--card); color: var(--text); border: 1px solid rgba(19,180,160,0.25); padding: 8px 12px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 12px; outline: none; transition: border-color 0.2s; text-align: center; width: 100%; }
-        .pos-input:focus { border-color: var(--teal); }
-        .pos-input::placeholder { color: var(--muted); font-size: 11px; }
-        .apply-pos-btn { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(19,180,160,0.3); padding: 10px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s; width: 100%; }
-        .apply-pos-btn:hover { background: rgba(19,180,160,0.25); }
-        .pos-error { font-size: 11px; color: #e06060; text-align: center; }
-        .manual-location-info { font-size: 12px; color: var(--teal); text-align: center; background: var(--teal-dim); border: 1px solid rgba(19,180,160,0.2); border-radius: 8px; padding: 8px 12px; }
-
-        .countdown-wrap { background: var(--deep); border: 1px solid rgba(212,160,23,0.18); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
-        .countdown-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(212,160,23,0.06), transparent); pointer-events: none; }
-        .cd-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; letter-spacing:0.05em; }
-        .cd-prayer-name { font-family:'Amiri',serif; font-size:16px; color:var(--gold); margin-bottom: 4px; font-weight: 700; }
-        .cd-timer { font-size: 42px; font-weight: 700; color: var(--gold); letter-spacing: 4px; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(212,160,23,0.3); }
-        
-        .prayer-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 22px; }
-        .p-item { background: var(--card); border-radius: 12px; padding: 12px 4px; text-align: center; border: 1px solid rgba(255,255,255,0.03); transition: border-color .3s; }
-        .p-item.active { border-color: var(--gold); background: linear-gradient(160deg, rgba(212,160,23,0.08), transparent); box-shadow: 0 0 14px rgba(212,160,23,0.12); }
-        .p-name { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
-        .p-time { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .p-item.active .p-time { color: var(--gold); }
-        
-        .maps-global { text-align: center; margin-bottom: 22px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-        .maps-global a { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); font-size: 13px; font-weight: 600; text-decoration: none; border-bottom: 1px dashed rgba(212,160,23,0.4); padding-bottom: 2px; transition: color .2s; }
-        .maps-global a:hover { color: #f0c040; }
-        
-        .sec-head { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 14px; font-weight: 600; }
-        
-        .historical-card { background: linear-gradient(135deg, var(--deep), var(--card)); border: 1px solid rgba(212,160,23,0.3); border-radius: 14px; padding: 16px; margin-bottom: 24px; }
-        .hist-title { font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
-        .hist-meta { font-size: 12px; color: var(--text); margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .hist-desc { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
-
-        .mosque-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-        .mosque-item { display: flex; flex-direction: column; gap: 0; background: var(--card); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px 14px; transition: transform .15s, border-color .25s; }
-        .mosque-item:hover { transform: translateY(-1px); border-color: rgba(19,180,160,0.35); }
-        .m-rank { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--teal-dim); color: var(--teal); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
-        .m-info { flex: 1; min-width: 0; }
-        .m-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .m-dist { font-size: 11px; color: var(--gold); margin-top: 2px; }
-        .m-state { font-size: 12px; color: var(--muted); text-align: center; padding: 16px; }
-        .load-more-btn { width: 100%; padding: 10px; border-radius: 10px; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(212,160,23,0.25); font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s; }
-        .load-more-btn:hover { background: rgba(212,160,23,0.25); }
-        .btn-map { flex-shrink: 0; padding: 4px 8px; border-radius: 7px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(19,180,160,0.25); transition: background .2s; white-space: nowrap; }
-        .btn-map:hover { background: rgba(19,180,160,0.25); }
-        .btn-map.gold { background: var(--gold); color: #000; border: none; box-shadow: 0 2px 8px rgba(212,160,23,0.25); }
-        .btn-map.gold:hover { background: #e6b520; }
-
-        /* Mawaqit prayer times block */
-        .mawaqit-times { margin-top: 8px; border-top: 1px solid rgba(19,180,160,0.12); padding-top: 7px; }
-        .mawaqit-label { font-size: 9.5px; color: var(--muted); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        .mawaqit-label a { color: var(--teal); font-weight: 700; text-decoration: none; font-size: 9.5px; }
-        .mawaqit-label a:hover { text-decoration: underline; }
-        .mawaqit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-        .mawaqit-prayer { text-align: center; }
-        .mawaqit-prayer-name { font-size: 9px; color: var(--muted); margin-bottom: 1px; }
-        .mawaqit-prayer-time { font-size: 11px; font-weight: 700; color: var(--teal); font-variant-numeric: tabular-nums; }
-        .mawaqit-prayer.current .mawaqit-prayer-time { color: var(--gold); }
-        .mawaqit-prayer.current .mawaqit-prayer-name { color: var(--gold); }
-        .mawaqit-loading { font-size: 10px; color: var(--muted); font-style: italic; }
-        .mawaqit-error { font-size: 10px; color: rgba(224,96,96,0.7); }
-        .mosque-item-top { display: flex; align-items: center; gap: 12px; width: 100%; }
-        
-        .qibla-wrap { text-align: center; margin-bottom: 24px; }
-        .qibla-t { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-        .qibla-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
-        .compass { width: 130px; height: 130px; border-radius: 50%; border: 2px solid var(--teal); margin: 0 auto 10px; position: relative; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(19,180,160,0.05), transparent 70%); box-shadow: 0 0 24px rgba(19,180,160,0.1); }
-        .compass-labels { position:absolute; inset:0; pointer-events:none; }
-        .compass-labels span { position: absolute; font-size: 9px; color: var(--muted); font-weight: 600; }
-        .lbl-n { top:5px; left:50%; transform:translateX(-50%); }
-        .lbl-s { bottom:5px; left:50%; transform:translateX(-50%); }
-        .lbl-e { left:7px; top:50%; transform:translateY(-50%); }
-        .lbl-w { right:7px; top:50%; transform:translateY(-50%); }
-        .needle { width: 2px; height: 50px; position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; transform: translateX(-50%) rotate(0deg); transition: transform 0.6s cubic-bezier(.4,0,.2,1); }
-        .needle-body { width: 100%; height: 100%; background: linear-gradient(to bottom, var(--gold), rgba(212,160,23,0.3)); border-radius: 2px 2px 0 0; }
-        .needle-tip { width: 10px; height: 10px; background: var(--gold); border-radius: 50%; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 8px rgba(212,160,23,0.6); }
-        .center-dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; position: absolute; z-index: 2; }
-        .qibla-deg { font-size: 13px; color: var(--gold); font-weight: 700; margin-bottom: 14px; }
-        .gps-bar { display: flex; justify-content: center; align-items: center; gap: 8px; background: var(--teal-dim); border: 1px solid rgba(19,180,160,0.18); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--teal); cursor: default; }
-        .gps-info { margin-top: 10px; border: 1px solid rgba(19,180,160,0.18); border-radius: 8px; background: rgba(8,22,18,0.72); padding: 10px 12px; text-align: right; }
-        .gps-info-title { color: var(--gold); font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-        .gps-info-row { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid rgba(255,255,255,0.04); font-size: 11px; }
-        .gps-info-title + .gps-info-row { border-top: 0; }
-        .gps-info-label { color: var(--muted); flex-shrink: 0; }
-        .gps-info-value { color: var(--text); direction: ltr; text-align: left; word-break: break-word; }
-        .gps-info-status { color: var(--teal); direction: rtl; text-align: left; }
-        .gps-info-status.warn { color: var(--gold); }
-        .gps-info-status.error { color: #e06060; }
-        .gps-log { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
-        .gps-log-item { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 6px; font-size: 10px; color: var(--muted); line-height: 1.45; }
-        .gps-log-item.accepted { color: var(--teal); }
-        .gps-log-item.rejected { color: var(--gold); }
-        .gps-log-coords { color: var(--text); direction: ltr; display: inline-block; }
-        
-        .footer { text-align: center; font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.15); text-transform: uppercase; padding: 20px 0 10px; }
-        /* Simulation panel */
-        #sim-panel { display:none; background:rgba(30,60,20,0.7); border:1px solid rgba(19,180,160,0.35); border-radius:12px; padding:14px 16px; margin-bottom:16px; }
-        .sim-header { font-size:12px; font-weight:700; color:var(--teal); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
-        .sim-badge { background:rgba(19,180,160,0.15); border:1px solid rgba(19,180,160,0.4); border-radius:6px; padding:2px 8px; font-size:10px; letter-spacing:.04em; }
-        .sim-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:12px; }
-        .sim-label { color:var(--muted); }
-        .sim-value { color:var(--text); font-weight:600; text-align:left; direction:ltr; }
-        #sim-location-name { color:var(--teal); font-weight:700; font-size:13px; text-align:center; margin-bottom:10px; min-height:18px; }
-        .sim-skip-row { display:flex; gap:8px; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid rgba(19,180,160,0.15); }
-        .sim-skip-input { background:var(--card); color:var(--text); border:1px solid rgba(19,180,160,0.3); border-radius:8px; padding:6px 10px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; width:70px; text-align:center; outline:none; }
-        .sim-skip-input:focus { border-color:var(--teal); }
-        .sim-skip-label { color:var(--muted); font-size:12px; flex:1; }
-        .sim-skip-btn { background:rgba(19,180,160,0.18); color:var(--teal); border:1px solid rgba(19,180,160,0.4); border-radius:8px; padding:6px 14px; font-family:'Cairo',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:background .2s; white-space:nowrap; }
-        .sim-skip-btn:hover { background:rgba(19,180,160,0.32); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الصلوات القبطية والكنائس التاريخية — LORD</title>
+<meta name="theme-color" content="#1a1208">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1208;--card:#241a0d;--deep:#120c05;
+  --gold:#d4af37;--gold-bright:#ffd700;--gold-dim:rgba(212,175,55,0.15);
+  --bordeaux:#7a2230;--bordeaux-dim:rgba(122,34,48,0.18);
+  --cream:#f0e6d2;--muted:#a8946a;--text:#f5ecd8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Cairo',sans-serif;background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(212,175,55,0.10) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 50% at 50% 110%,rgba(122,34,48,0.12) 0%,transparent 70%);
+  color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:24px 16px;
+}
+.app{width:100%;max-width:460px;animation:fadeUp 0.7s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.cross-top{text-align:center;margin-bottom:8px;}
+.cross-top svg{width:46px;height:46px;filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));animation:cross-glow 3s ease-in-out infinite;}
+@keyframes cross-glow{0%,100%{filter:drop-shadow(0 0 8px rgba(212,175,55,0.4));}50%{filter:drop-shadow(0 0 18px rgba(212,175,55,0.9));}}
+.header{text-align:center;margin-bottom:20px;position:relative;}
+.header::after{content:'';display:block;width:70px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:12px auto 0;}
+.waqf-label{font-size:11px;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px;font-weight:700;}
+.app-title{font-family:'Amiri',serif;font-size:26px;color:var(--gold-bright);font-weight:700;line-height:1.3;text-shadow:0 0 16px rgba(212,175,55,0.4);}
+.app-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.coptic-date{font-size:12px;color:#e89aa6;margin-top:6px;font-weight:600;}
+.sync-dot{display:inline-block;width:7px;height:7px;background:var(--gold);border-radius:50%;margin-left:5px;animation:pulse 2s infinite;vertical-align:middle;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+.method-selector-wrap{margin-bottom:14px;text-align:center;}
+.method-select{background:var(--card);color:var(--text);border:1px solid rgba(212,175,55,0.25);padding:9px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;width:100%;outline:none;transition:border-color 0.2s;}
+.method-select:focus{border-color:var(--gold);}
+.manual-pos-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.pos-input{background:var(--card);color:var(--text);border:1px solid rgba(212,175,55,0.25);padding:9px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;text-align:center;width:100%;}
+.pos-input:focus{border-color:var(--gold);}
+.pos-input::placeholder{color:var(--muted);font-size:11px;}
+.apply-pos-btn{background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.3);padding:10px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s;width:100%;}
+.apply-pos-btn:hover{background:rgba(212,175,55,0.25);}
+.pos-error{font-size:11px;color:#e58080;text-align:center;}
+.manual-location-info{font-size:12px;color:var(--gold-bright);text-align:center;background:var(--gold-dim);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:8px 12px;}
+.countdown-wrap{background:var(--deep);border:1px solid rgba(212,175,55,0.2);border-radius:18px;padding:20px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden;}
+.countdown-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(212,175,55,0.07),transparent);pointer-events:none;}
+.cd-label{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.05em;}
+.cd-prayer-name{font-family:'Amiri',serif;font-size:18px;color:var(--gold-bright);margin-bottom:4px;font-weight:700;}
+.cd-timer{font-size:40px;font-weight:700;color:var(--gold-bright);letter-spacing:4px;font-variant-numeric:tabular-nums;text-shadow:0 0 20px rgba(212,175,55,0.35);}
+.prayer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
+.p-item{background:var(--card);border-radius:12px;padding:11px 4px;text-align:center;border:1px solid rgba(255,255,255,0.03);transition:border-color .3s;}
+.p-item.active{border-color:var(--gold);background:linear-gradient(160deg,rgba(212,175,55,0.1),transparent);box-shadow:0 0 14px rgba(212,175,55,0.14);}
+.p-name{font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:600;font-family:'Amiri',serif;}
+.p-time{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.p-item.active .p-time{color:var(--gold-bright);}
+.maps-global{text-align:center;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.maps-global a{display:inline-flex;align-items:center;gap:6px;color:var(--gold-bright);font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(212,175,55,0.4);padding-bottom:2px;transition:color .2s;}
+.maps-global a:hover{color:var(--cream);}
+.sec-head{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gold-bright);border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:8px;margin-bottom:14px;font-weight:600;font-family:'Amiri',serif;}
+.historical-card{background:linear-gradient(135deg,var(--deep),var(--card));border:1px solid rgba(212,175,55,0.3);border-radius:14px;padding:16px;margin-bottom:24px;position:relative;overflow:hidden;}
+.historical-card::after{content:'☦';position:absolute;top:-8px;left:-8px;font-size:60px;color:rgba(212,175,55,0.06);}
+.hist-title{font-size:14px;font-weight:700;color:var(--gold-bright);margin-bottom:4px;}
+.hist-meta{font-size:12px;color:var(--text);margin-bottom:10px;display:flex;justify-content:space-between;}
+.hist-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.mosque-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.mosque-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;transition:transform .15s,border-color .25s;}
+.mosque-item:hover{transform:translateY(-1px);border-color:rgba(212,175,55,0.35);}
+.m-rank{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bordeaux-dim);color:#e89aa6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.m-info{flex:1;min-width:0;}
+.m-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-dist{font-size:11px;color:var(--gold-bright);margin-top:2px;}
+.m-state{font-size:12px;color:var(--muted);text-align:center;padding:16px;}
+.load-more-btn{width:100%;padding:10px;border-radius:10px;background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.25);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s;}
+.load-more-btn:hover{background:rgba(212,175,55,0.25);}
+.btn-map{flex-shrink:0;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;background:var(--gold-dim);color:var(--gold-bright);border:1px solid rgba(212,175,55,0.25);transition:background .2s;white-space:nowrap;}
+.btn-map:hover{background:rgba(212,175,55,0.25);}
+.btn-map.gold{background:var(--gold);color:#1a1208;border:none;box-shadow:0 2px 8px rgba(212,175,55,0.25);}
+.qibla-wrap{text-align:center;margin-bottom:24px;}
+.qibla-t{font-size:14px;font-weight:600;margin-bottom:2px;font-family:'Amiri',serif;color:var(--gold-bright);}
+.qibla-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.compass{width:130px;height:130px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 10px;position:relative;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle,rgba(212,175,55,0.06),transparent 70%);box-shadow:0 0 24px rgba(212,175,55,0.12);}
+.compass-labels{position:absolute;inset:0;pointer-events:none;}
+.compass-labels span{position:absolute;font-size:9px;color:var(--muted);font-weight:600;}
+.lbl-n{top:5px;left:50%;transform:translateX(-50%);}
+.lbl-s{bottom:5px;left:50%;transform:translateX(-50%);}
+.lbl-e{left:7px;top:50%;transform:translateY(-50%);color:var(--gold-bright);font-weight:700;}
+.lbl-w{right:7px;top:50%;transform:translateY(-50%);}
+.needle{width:2px;height:50px;position:absolute;bottom:50%;left:50%;transform-origin:bottom center;transform:translateX(-50%) rotate(0deg);transition:transform 0.6s cubic-bezier(.4,0,.2,1);}
+.needle-body{width:100%;height:100%;background:linear-gradient(to bottom,var(--gold-bright),rgba(212,175,55,0.3));border-radius:2px 2px 0 0;}
+.needle-tip{font-size:14px;position:absolute;top:-14px;left:50%;transform:translateX(-50%);color:var(--gold-bright);}
+.center-dot{width:10px;height:10px;background:var(--bordeaux);border-radius:50%;position:absolute;z-index:2;}
+.qibla-deg{font-size:13px;color:var(--gold-bright);font-weight:700;margin-bottom:14px;}
+.gps-bar{display:flex;justify-content:center;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid rgba(212,175,55,0.18);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--gold-bright);}
+.footer{text-align:center;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.15);text-transform:uppercase;padding:20px 0 10px;}
+.footer-cross{color:rgba(212,175,55,0.3);font-size:14px;margin-bottom:6px;}
+</style>
 </head>
 <body>
 <div class="app">
-    <div class="header">
-        <div class="waqf-label">وقف خيري لروح جدي العزيز الحاج حمودة سيدهم</div>
-        <div class="app-title">مواقيت الصلاة العالمية</div>
-        <div class="hijri" id="hijri-date">-- --- ---- هـ</div>
-        <div style="margin-top:8px;font-size:11px;color:var(--teal)">
-            <span class="sync-dot"></span> رصد الموقع ذكي وجغرافي بالـ GPS
-        </div>
+  <div class="cross-top">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round">
+        <line x1="24" y1="6" x2="24" y2="42"/><line x1="6" y1="24" x2="42" y2="24"/>
+        <line x1="19" y1="11" x2="29" y2="11"/><line x1="19" y1="37" x2="29" y2="37"/>
+        <line x1="11" y1="19" x2="11" y2="29"/><line x1="37" y1="19" x2="37" y2="29"/>
+      </g>
+      <circle cx="24" cy="24" r="4" fill="none" stroke="#ffd700" stroke-width="2"/>
+    </svg>
+  </div>
+  <div class="header">
+    <div class="waqf-label">وقف محبة لكنائس مصر العريقة</div>
+    <div class="app-title">السبع صلوات القبطية</div>
+    <div class="app-sub">الأجبية · الكنائس · المعالم التاريخية</div>
+    <div class="coptic-date" id="coptic-date">التقويم القبطي</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--gold-bright)"><span class="sync-dot"></span> رصد ذكي للموقع بالـ GPS</div>
+  </div>
+  <div class="method-selector-wrap">
+    <select id="pos-mode-select" class="method-select">
+      <option value="auto" selected>📡 الموقع التلقائي (GPS)</option>
+      <option value="manual">✏️ إدخال يدوي للإحداثيات</option>
+    </select>
+  </div>
+  <div id="manual-pos-panel" class="manual-pos-wrap" style="display:none;">
+    <input type="text" id="manual-coords" class="pos-input" placeholder="مثال: 30.044420, 31.235712" dir="ltr" autocomplete="off">
+    <button id="apply-pos-btn" class="apply-pos-btn">تطبيق الموقع ✓</button>
+    <div id="pos-error" class="pos-error" style="display:none;"></div>
+    <div id="manual-location-info" class="manual-location-info" style="display:none;"></div>
+  </div>
+  <div class="countdown-wrap">
+    <div class="cd-label">الوقت المتبقي للصلاة القادمة</div>
+    <div class="cd-prayer-name" id="next-prayer-name">--</div>
+    <div class="cd-timer" id="cd-timer">00:00:00</div>
+  </div>
+  <div class="prayer-grid" id="prayer-grid"></div>
+  <div class="prayer-grid" id="prayer-grid2" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;"></div>
+  <div class="maps-global"><a id="global-maps-link" href="#" target="_blank">☦ أقرب كنيسة إليكم الآن (خرائط Google)</a></div>
+  <div class="sec-head"><span>⛪</span><span>أقرب كنيسة أو دير تاريخي</span></div>
+  <div class="historical-card" id="historical-card">
+    <div class="hist-title" id="hist-name">جاري رصد المعالم التاريخية...</div>
+    <div class="hist-meta"><span id="hist-age" style="color:var(--gold-bright);font-weight:600;">العمر: --</span><span id="hist-city" style="color:var(--muted);">المدينة: --</span></div>
+    <div class="hist-desc" id="hist-desc">سيظهر هنا أقرب كنيسة أو دير قبطي تاريخي.</div>
+    <a id="hist-map-btn" href="#" target="_blank" class="btn-map gold" style="display:inline-block;text-align:center;">🗺️ وجهني لأقرب معلم تاريخي</a>
+  </div>
+  <div class="sec-head"><span>☦</span><span id="zone-title">أقرب الكنائس إليكم</span></div>
+  <div class="mosque-list" id="mosque-list"></div>
+  <div class="sec-head"><span>🧭</span><span>اتجاه الصلاة (الشرق)</span></div>
+  <div class="qibla-wrap">
+    <div class="qibla-t">نحو الشرق</div>
+    <div class="qibla-sub">يصلي الأقباط نحو الشروق رمزاً للمسيح شمس البر</div>
+    <div class="compass">
+      <div class="compass-labels"><span class="lbl-n">ش</span><span class="lbl-s">ج</span><span class="lbl-e">شرق</span><span class="lbl-w">غ</span></div>
+      <div class="needle" id="needle"><div class="needle-body"></div><div class="needle-tip">☦</div></div>
+      <div class="center-dot"></div>
     </div>
-
-    <div class="method-selector-wrap">
-        <select id="method-select" class="method-select">
-            <option value="tunisia" selected="">تونس والمغرب العربي (فجر 18°، عشاء 17°)</option>
-            <option value="mwl">رابطة العالم الإسلامي (فجر 18°، عشاء 17°)</option>
-            <option value="egypt">الهيئة المصرية العامة للمساحة (فجر 19.5°، عشاء 17.5°)</option>
-            <option value="makkah">أم القرى - مكة المكرمة (فجر 18.5°، عشاء +90 دقيقة)</option>
-        </select>
-    </div>
-    <div class="method-selector-wrap">
-        <select id="pos-mode-select" class="method-select">
-            <option value="auto" selected>📡 الموقع التلقائي (GPS)</option>
-            <option value="manual">✏️ إدخال يدوي للإحداثيات</option>
-        </select>
-    </div>
-    <div id="manual-pos-panel" class="manual-pos-wrap" style="display:none;">
-        <input type="text" id="manual-coords" class="pos-input" placeholder="مثال: 36.450354, 10.731993" dir="ltr" autocomplete="off">
-        <button id="apply-pos-btn" class="apply-pos-btn">تطبيق الموقع ✓</button>
-        <div id="pos-error" class="pos-error" style="display:none;"></div>
-        <div id="manual-location-info" class="manual-location-info" style="display:none;"></div>
-    </div>
-    <div id="sim-panel">
-        <div class="sim-header">🚗 محاكاة <span class="sim-badge">SIMULATION</span></div>
-        <div id="sim-location-name">جاري التحديد...</div>
-        <div class="sim-row"><span class="sim-label">الإحداثيات</span><span class="sim-value" id="sim-coords">-- , --</span></div>
-        <div class="sim-row"><span class="sim-label">المتبقي للوصول</span><span class="sim-value" id="sim-remaining">-- كم</span></div>
-        <div class="sim-skip-row">
-            <input type="number" id="sim-skip-km" class="sim-skip-input" value="3" min="0.1" max="80" step="0.5">
-            <span class="sim-skip-label">كم — تخطي</span>
-            <button id="sim-skip-btn" class="sim-skip-btn">⏩ تخطي</button>
-        </div>
-    </div>
-
-    <div class="countdown-wrap">
-        <div class="cd-label">الوقت المتبقي للصلاة القادمة</div>
-        <div class="cd-prayer-name" id="next-prayer-name">--</div>
-        <div class="cd-timer" id="cd-timer">00:00:00</div>
-    </div>
-
-    <div class="prayer-grid" id="prayer-grid"></div>
-
-    <div class="maps-global">
-        <a id="global-maps-link" href="#" target="_blank">
-            Public 🕌 أقرب مسجد إليكم الآن (خرائط Google)
-        </a>
-    </div>
-
-    <div class="sec-head">
-        <span>🏛️</span>
-        <span>أقرب جامع تاريخي موثق</span>
-    </div>
-    <div class="historical-card" id="historical-card">
-        <div class="hist-title" id="hist-name">جاري رصد المعالم التاريخية...</div>
-        <div class="hist-meta">
-            <span id="hist-age" style="color: var(--gold); font-weight:600;">العمر: --</span>
-            <span id="hist-city" style="color: var(--muted);">المدينة: --</span>
-        </div>
-        <div class="hist-desc" id="hist-desc">سيظهر هنا أقرب مسجد تاريخي موثق من قاعدة البيانات.</div>
-        <a id="hist-map-btn" href="#" target="_blank" class="btn-map gold" style="display:inline-block; text-align:center;">🗺️ وجهني لأقرب جامع تاريخي</a>
-    </div>
-
-    <div class="sec-head">
-        <span>🕌</span>
-        <span id="zone-title">أقرب المساجد إليكم</span>
-    </div>
-    <div class="mosque-list" id="mosque-list"></div>
-
-    <div class="sec-head"><span>🧭</span><span>اتجاه القبلة</span></div>
-    <div class="qibla-wrap">
-        <div class="qibla-t">القبلة</div>
-        <div class="qibla-sub">الاتجاه نحو الكعبة المشرفة</div>
-        <div class="compass">
-            <div class="compass-labels">
-                <span class="lbl-n">ش</span>
-                <span class="lbl-s">ج</span>
-                <span class="lbl-e">غ</span>
-                <span class="lbl-w">ق</span>
-            </div>
-            <div class="needle" id="needle">
-                <div class="needle-body"></div>
-                <div class="needle-tip"></div>
-            </div>
-            <div class="center-dot"></div>
-        </div>
-        <div class="qibla-deg" id="qibla-deg">--°</div>
-        <div class="gps-bar">
-            <span>📡</span>
-            <span id="gps-txt">يرجى تفعيل GPS لربط الإحداثيات العالمية</span>
-        </div>
-    </div>
-
-    <div class="footer">SYSTEM MANAGER · LORD · AL-WASFA AL-MAFKOUDA</div>
+    <div class="qibla-deg" id="qibla-deg">90° شرقاً</div>
+    <div class="gps-bar"><span>📡</span><span id="gps-txt">يرجى تفعيل GPS لتحديد موقعكم</span></div>
+  </div>
+  <div class="footer"><div class="footer-cross">☦ ✝ ☦</div>SYSTEM MANAGER · LORD · الكنيسة القبطية الأرثوذكسية</div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-const d2r = d => d * Math.PI / 180;
-const r2d = r => r * 180 / Math.PI;
-const fixHour  = h => h - 24 * Math.floor(h / 24);
-const fixAngle = a => a - 360 * Math.floor(a / 360);
-
-let currentLat = null;
-let currentLng = null;
-let countdownInterval = null;
-let gpsTrackInterval = null;
-let gpsWatchId = null;
-let latestGpsPos = null;
-let updateTimesInterval = null;
-const GPS_REQUIRED_ACCURACY_M = 100;
-const GPS_MAX_FIX_AGE_MS = 30000;
-const GPS_APPLY_DISTANCE_KM = 0.05;
-const GPS_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 };
-const GPS_LOG_LIMIT = 8;
-let gpsMonitor = {
-    accepted: 0,
-    rejected: 0,
-    lastAccepted: null,
-    totalKm: 0,
-    log: [],
-};
-let gpsPlaceRequestSeq = 0;
-let gpsPlaceLastKey = '';
-const gpsPlaceCache = new Map();
-let mosqueSearchSeq = 0;
-let appLocationSeq = 0;
-const MOSQUE_SEARCH_RADII_KM = [1, 3, 5, 10, 15, 25];
-
-const SIM_MODE = new URLSearchParams(window.location.search).get('simulation_test') === 'true';
-if (SIM_MODE) console.warn('[SIM] وضع المحاكاة مفعّل: تونس → نابل · طريق A1 · 50 كم/س');
-
-// Simulation route: Tunis → Nabeul via A1 highway
-const SIM_ROUTE = [
-    [36.8190, 10.1658],  // تونس العاصمة
-    [36.7302, 10.2280],  // بن عروس
-    [36.7252, 10.3386],  // حمام الأنف
-    [36.6984, 10.4858],  // سليمان
-    [36.6046, 10.5051],  // قرمبالية
-    [36.5307, 10.5873],  // بني خلاد
-    [36.4959, 10.6205],  // منزل بوزلفة
-    [36.4050, 10.6206],  // الحمامات
-    [36.4510, 10.7370],  // نابل (الوجهة)
+const d2r=d=>d*Math.PI/180,r2d=r=>r*180/Math.PI,fixHour=h=>h-24*Math.floor(h/24),fixAngle=a=>a-360*Math.floor(a/360);
+let currentLat=null,currentLng=null,countdownInterval=null,gpsWatchId=null,updateTimesInterval=null;
+// تم تعديل القيم أدناه لتقليل حساسية الـ GPS عند المشي
+const GPS_ACC=200,GPS_AGE=60000,GPS_DIST=0.2,GPS_OPT={enableHighAccuracy:true,timeout:20000,maximumAge:0};
+let mosqueSearchSeq=0,appLocationSeq=0;
+const RADII=[1,3,5,10,15,25];
+const COPTIC_HOURS=[
+  {name:'باكر',type:'sunrise',icon:'🌅'},{name:'الثالثة',type:'fixed',h:9,icon:'☀️'},
+  {name:'السادسة',type:'fixed',h:12,icon:'🌤️'},{name:'التاسعة',type:'fixed',h:15,icon:'⛅'},
+  {name:'الغروب',type:'sunset',icon:'🌇'},{name:'النوم',type:'fixed',h:21,icon:'🌙'},
+  {name:'نصف الليل',type:'fixed',h:0,icon:'✨'},
 ];
-const SIM_SPEED_KMH = 50;
-const SIM_DEST = SIM_ROUTE[SIM_ROUTE.length - 1];
-let simSegIdx = 0;
-let simSegDist = 0; // km traveled into the current segment
-
-function simAdvance(kmStep) {
-    simSegDist += kmStep;
-    while (simSegIdx < SIM_ROUTE.length - 1) {
-        const [lat1, lon1] = SIM_ROUTE[simSegIdx];
-        const [lat2, lon2] = SIM_ROUTE[simSegIdx + 1];
-        const segLen = haversineKm(lat1, lon1, lat2, lon2);
-        if (simSegDist <= segLen) break;
-        simSegDist -= segLen;
-        simSegIdx++;
-    }
-    if (simSegIdx >= SIM_ROUTE.length - 1) return { lat: SIM_DEST[0], lng: SIM_DEST[1], done: true };
-    const [lat1, lon1] = SIM_ROUTE[simSegIdx];
-    const [lat2, lon2] = SIM_ROUTE[simSegIdx + 1];
-    const t = simSegDist / haversineKm(lat1, lon1, lat2, lon2);
-    return { lat: lat1 + (lat2 - lat1) * t, lng: lon1 + (lon2 - lon1) * t, done: false };
-}
-
-function updateSimPanel(lat, lng) {
-    const remKm = haversineKm(lat, lng, SIM_DEST[0], SIM_DEST[1]);
-    document.getElementById('sim-coords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    document.getElementById('sim-remaining').textContent = `${remKm.toFixed(2)} كم`;
-    document.getElementById('sim-location-name').textContent = '...';
-    reverseGeocode(lat, lng).then(({ city, state }) => {
-        const label = [city, state].filter(Boolean).join(' · ');
-        document.getElementById('sim-location-name').textContent = label || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    });
-}
-
-function showGpsNotif(text, changed) {
-    Toastify({
-        text,
-        duration: 4000,
-        gravity: 'bottom',
-        position: 'right',
-        stopOnFocus: false,
-        style: {
-            background: changed ? 'rgba(19,180,160,0.92)' : 'rgba(30,60,54,0.95)',
-            color: changed ? '#fff' : '#7a9e96',
-            border: changed ? '1px solid #13b4a0' : '1px solid rgba(122,158,150,0.3)',
-            borderRadius: '10px',
-            fontFamily: "'Cairo', sans-serif",
-            fontSize: '13px',
-            fontWeight: '600',
-            padding: '10px 16px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-            direction: 'rtl',
-        }
-    }).showToast();
-}
-
-const historicalMosquesDB = [
-    {
-        id: "great_mosque_kairouan",
-        name: "جامع عقبة بن نافع",
-        wilaya: "Kairouan",
-        city: "Kairouan",
-        latitude: 35.681111,
-        longitude: 10.103889,
-        foundationYear: 670,
-        foundationYearLabel: "670",
-        estimatedAgeYearsIn2026: 1356,
-        description: "يعد جامع عقبة بن نافع بالقيروان من أهم المعالم الدينية في الغرب الإسلامي. تأسس نحو سنة 670، وشكل نواة مدينة القيروان ومركزها الديني والسياسي والعسكري في إفريقية."
-    },
-    {
-        id: "zitouna_mosque",
-        name: "جامع الزيتونة",
-        wilaya: "Tunis",
-        city: "Tunis",
-        latitude: 36.797222,
-        longitude: 10.171111,
-        foundationYear: 699,
-        foundationYearLabel: "699-704",
-        estimatedAgeYearsIn2026: 1322,
-        description: "جامع الزيتونة هو المعلم الديني التاريخي الأكبر في مدينة تونس العتيقة. تعود نشأته غالبا إلى الفترة بين 699 و704، وكان عبر القرون مركزا بارزا للصلاة والعلم والحياة العمرانية."
-    },
-    {
-        id: "bou_ftata_mosque",
-        name: "جامع بوفتاتة",
-        wilaya: "Sousse",
-        city: "Sousse",
-        latitude: 35.822778,
-        longitude: 10.638056,
-        foundationYear: 838,
-        foundationYearLabel: "838-841",
-        estimatedAgeYearsIn2026: 1185,
-        description: "جامع بوفتاتة بسوسة مسجد أغلبي صغير يرجح أنه تأسس بين 838 و841. تبرز قيمته في واجهته القديمة ورواقه ذي الأقواس الثلاثة ونقيشة التأسيس المحفوظة."
-    },
-    {
-        id: "great_mosque_sfax",
-        name: "الجامع الكبير بصفاقس",
-        wilaya: "Sfax",
-        city: "Sfax",
-        latitude: 34.735833,
-        longitude: 10.760833,
-        foundationYear: 850,
-        foundationYearLabel: "850",
-        estimatedAgeYearsIn2026: 1176,
-        description: "الجامع الكبير بصفاقس هو المعلم الديني الرئيسي في المدينة العتيقة. تأسس نحو سنة 850، ويحتل موقعا مركزيا داخل النسيج التاريخي للمدينة."
-    },
-    {
-        id: "great_mosque_sousse",
-        name: "الجامع الكبير بسوسة",
-        wilaya: "Sousse",
-        city: "Sousse",
-        latitude: 35.82695,
-        longitude: 10.639772,
-        foundationYear: 851,
-        foundationYearLabel: "851",
-        estimatedAgeYearsIn2026: 1175,
-        description: "الجامع الكبير بسوسة من أبرز المعالم الأغلبية في الساحل التونسي. تأسس سنة 851، ويمتاز بطابعه المتين القريب من العمارة الدفاعية وبصلته بالمجال التاريخي قرب الرباط."
-    },
-    {
-        id: "great_mosque_monastir",
-        name: "الجامع الكبير بالمنستير",
-        wilaya: "Monastir",
-        city: "Monastir",
-        latitude: 35.775556,
-        longitude: 10.833611,
-        foundationYear: 850,
-        foundationYearLabel: "IXe siècle",
-        estimatedAgeYearsIn2026: 1127,
-        description: "يقع الجامع الكبير بالمنستير قرب الرباط ومقابلا للبحر، في فضاء ارتبط طويلا بالتاريخ الديني والعسكري للساحل التونسي. تعود مرحلته الأولى إلى القرن التاسع."
-    },
-    {
-        id: "three_doors_mosque",
-        name: "مسجد الأبواب الثلاثة",
-        wilaya: "Kairouan",
-        city: "Kairouan",
-        latitude: 35.676944,
-        longitude: 10.097222,
-        foundationYear: 866,
-        foundationYearLabel: "866",
-        estimatedAgeYearsIn2026: 1160,
-        description: "مسجد الأبواب الثلاثة، المعروف أيضا بمسجد ابن خيرون، من أنفس معالم القيروان. تأسس سنة 866، واشتهر بواجهته المزخرفة ذات الأقواس الثلاثة ونقوشه الكوفية."
-    },
-    {
-        id: "great_mosque_mahdia",
-        name: "الجامع الكبير بالمهدية",
-        wilaya: "Mahdia",
-        city: "Mahdia",
-        latitude: 35.503889,
-        longitude: 11.071944,
-        foundationYear: 916,
-        foundationYearLabel: "916",
-        estimatedAgeYearsIn2026: 1110,
-        description: "الجامع الكبير بالمهدية من أهم معالم العصر الفاطمي. تأسس سنة 916 في عهد الخليفة المهدي ضمن العاصمة الفاطمية الجديدة على الساحل."
-    },
-    {
-        id: "sayeda_ribat_mosque",
-        name: "رباط ومسجد السيدة",
-        wilaya: "Monastir",
-        city: "Monastir",
-        latitude: null,
-        longitude: null,
-        foundationYear: 850,
-        foundationYearLabel: "Milieu du IXe siècle",
-        estimatedAgeYearsIn2026: 1170,
-        description: "رباط ومسجد السيدة مركب ديني ودفاعي بالمنستير يعود إلى الوسط التقريبي للقرن التاسع. إحداثياته غير مؤكدة، لذلك لا يدخل في حساب أقرب مسجد تاريخي."
-    }
+const historicalDB=[
+  {name:'الكنيسة المعلقة',city:'القاهرة (مصر القديمة)',lat:30.005402,lon:31.230148,age:1700,desc:'الكنيسة المعلقة (كنيسة السيدة العذراء مريم) من أقدم كنائس مصر، بُنيت فوق بقايا حصن بابليون. تعود أصولها إلى القرن الثالث أو الرابع الميلادي وتُعد درّة الفن القبطي.'},
+  {name:'كنيسة أبو سرجة',city:'القاهرة (مصر القديمة)',lat:30.006130,lon:31.231300,age:1600,desc:'كنيسة القديسين سرجيوس وواخس، يُعتقد أنها بُنيت فوق المغارة التي آوت العائلة المقدسة أثناء رحلتها إلى مصر. من أعرق الكنائس القبطية الأرثوذكسية.'},
+  {name:'كنيسة القديسة بربارة',city:'القاهرة (مصر القديمة)',lat:30.005800,lon:31.231900,age:1500,desc:'كنيسة أثرية في مجمع مصر القديمة، تتميز بحاجزها الخشبي المطعّم بالعاج وأيقوناتها النادرة.'},
+  {name:'دير الأنبا أنطونيوس',city:'البحر الأحمر',lat:28.916111,lon:32.354722,age:1670,desc:'أقدم دير مسيحي عامر في العالم، أسسه أتباع القديس أنطونيوس الكبير أبو الرهبنة. يقع عند سفح جبال الجلالة قرب البحر الأحمر.'},
+  {name:'دير الأنبا بولا',city:'البحر الأحمر',lat:28.846667,lon:32.551944,age:1650,desc:'دير القديس بولا أول السوّاح، من أقدم الأديرة في العالم. يقع في صحراء البحر الأحمر ويضم مغارة القديس بولا.'},
+  {name:'الدير الأحمر',city:'سوهاج',lat:26.520556,lon:31.661944,age:1550,desc:'دير الأنبا بيشاي (الدير الأحمر) قرب سوهاج، سُمّي لاستخدام الطوب الأحمر في بنائه. من روائع العمارة القبطية القديمة.'},
+  {name:'الدير الأبيض',city:'سوهاج',lat:26.547500,lon:31.629167,age:1586,desc:'دير الأنبا شنودة (الدير الأبيض)، أسسه الأنبا شنودة رئيس المتوحدين. بُني من الحجر الجيري الأبيض ويُعد معلماً بارزاً للرهبنة القبطية.'},
+  {name:'دير القديسة كاترين',city:'سيناء',lat:28.555800,lon:33.975800,age:1478,desc:'دير سانت كاترين عند سفح جبل موسى بسيناء، من أقدم الأديرة المسيحية العاملة، ومدرج ضمن مواقع التراث العالمي لليونسكو.'},
+  {name:'دير المحرق',city:'أسيوط',lat:27.533056,lon:30.893889,age:1600,desc:'دير السيدة العذراء (المحرق) بجبل قسقام، يُعتقد أن العائلة المقدسة أقامت فيه ستة أشهر. من أهم محطات رحلة العائلة المقدسة.'},
+  {name:'دير الأنبا بيشوي',city:'وادي النطرون',lat:30.354722,lon:30.350556,age:1650,desc:'أحد أديرة وادي النطرون العامرة، يضم جسد الأنبا بيشوي. مركز رهباني مهم في برية شيهيت.'},
+  {name:'دير السريان',city:'وادي النطرون',lat:30.351389,lon:30.343611,age:1500,desc:'دير السيدة العذراء (السريان) بوادي النطرون، اشتهر بمكتبته ومخطوطاته النادرة وفنونه الجدارية.'},
 ];
-
-function sunPosition(jd) {
-    const D = jd - 2451545.0;
-    const g = fixAngle(357.529 + 0.98560028 * D);
-    const q = fixAngle(280.459 + 0.98564736 * D);
-    const L = fixAngle(q + 1.915 * Math.sin(d2r(g)) + 0.020 * Math.sin(d2r(2*g)));
-    const e = 23.439 - 0.00000036 * D;
-    const RA = r2d(Math.atan2(Math.cos(d2r(e)) * Math.sin(d2r(L)), Math.cos(d2r(L)))) / 15;
-    const dec = r2d(Math.asin(Math.sin(d2r(e)) * Math.sin(d2r(L))));
-    const EqT = q/15 - fixHour(RA);
-    return { dec, EqT };
-}
-
-function julianDate(y, m, d) {
-    if (m <= 2) { y--; m += 12; }
-    const A = Math.floor(y/100);
-    const B = 2 - A + Math.floor(A/4);
-    return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + d + B - 1524.5;
-}
-
-function computePrayers(lat, lng, timezone, method, date = new Date()) {
-    const y = date.getFullYear(), m = date.getMonth()+1, d = date.getDate();
-    const jd = julianDate(y, m, d);
-    const { dec, EqT } = sunPosition(jd);
-    const Dhuhr = 12 + timezone - lng/15 - EqT;
-    
-    function hourAngle(alpha, direction) {
-        const latRad = d2r(lat);
-        const decRad = d2r(dec);
-        const cosH = (Math.sin(d2r(alpha)) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
-        if (cosH > 1 || cosH < -1) return null;
-        const h = r2d(Math.acos(cosH)) / 15;
-        return direction === 'rise' ? Dhuhr - h : Dhuhr + h;
-    }
-
-    let fajrAngle = -18;
-    let ishaAngle = -17;
-    let ishaMinutesAfterMaghrib = null;
-
-    if (method === 'egypt') { fajrAngle = -19.5; ishaAngle = -17.5; }
-    else if (method === 'makkah') { fajrAngle = -18.5; ishaMinutesAfterMaghrib = 90; }
-    else if (method === 'mwl') { fajrAngle = -18; ishaAngle = -17; }
-
-    const FajrTime = hourAngle(fajrAngle, 'rise');
-    const asrAngle = r2d(Math.atan(1 / (1 + Math.tan(d2r(Math.abs(lat - dec))))));
-    const AsrTime = hourAngle(asrAngle, 'set');
-    const MaghribTime = hourAngle(-0.8333, 'set');
-    
-    let IshaTime = null;
-    if (ishaMinutesAfterMaghrib !== null) {
-        if (MaghribTime !== null) IshaTime = MaghribTime + (ishaMinutesAfterMaghrib / 60);
-    } else {
-        IshaTime = hourAngle(ishaAngle, 'set');
-    }
-
-    const fmt = h => { 
-        if (h === null || isNaN(h)) return '--:--'; 
-        h = fixHour(h); 
-        const mTotal = Math.round((h - Math.floor(h)) * 60);
-        let hr = Math.floor(h);
-        let mn = mTotal;
-        if (mn === 60) { mn = 0; hr = (hr + 1) % 24; }
-        return String(hr).padStart(2,'0') + ':' + String(mn).padStart(2,'0'); 
-    };
-
-    return [
-        { name:'الفجر',  time: FajrTime, fmt: fmt(FajrTime) },
-        { name:'الظهر',  time: Dhuhr,    fmt: fmt(Dhuhr) },
-        { name:'العصر',  time: AsrTime,  fmt: fmt(AsrTime) },
-        { name:'المغرب', time: MaghribTime, fmt: fmt(MaghribTime) },
-        { name:'العشاء', time: IshaTime, fmt: fmt(IshaTime) },
-    ];
-}
-
-function getHijriDate() {
-    try { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric',month:'long',year:'numeric'}).format(new Date()); }
-    catch(e) { return ''; }
-}
-
-function renderPrayers(prayers, nowH) {
-    const grid = document.getElementById('prayer-grid');
-    grid.innerHTML = '';
-    let nextIdx = -1;
-    for (let i = 0; i < prayers.length; i++) {
-        if (prayers[i].time !== null && fixHour(prayers[i].time) > nowH) { nextIdx = i; break; }
-    }
-    if (nextIdx === -1) nextIdx = 0;
-    
-    prayers.forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'p-item' + (i === nextIdx ? ' active' : '');
-        div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-time">${p.fmt}</div>`;
-        grid.appendChild(div);
-    });
-    return nextIdx;
-}
-
-function startCountdown(prayers) {
-    if (countdownInterval) clearInterval(countdownInterval);
-    const timer = document.getElementById('cd-timer');
-    const nameEl = document.getElementById('next-prayer-name');
-    
-    function tick() {
-        const now = new Date();
-        const nowH = now.getHours() + now.getMinutes()/60 + now.getSeconds()/3600;
-        let idx = -1;
-        for (let i = 0; i < prayers.length; i++) {
-            if (prayers[i].time !== null && fixHour(prayers[i].time) > nowH) { idx = i; break; }
-        }
-        
-        let isNextDay = false;
-        if (idx === -1) {
-            idx = 0;
-            isNextDay = true;
-        }
-        
-        const next = prayers[idx];
-        if (!next || next.time === null) { timer.textContent = '--:--:--'; return; }
-        nameEl.textContent = next.name + (isNextDay ? ' (غداً)' : '');
-        
-        let diffHours = fixHour(next.time) - nowH;
-        if (isNextDay) diffHours = (24 - nowH) + fixHour(next.time);
-        
-        const totalSec = Math.max(0, Math.floor(diffHours * 3600));
-        const hrs = Math.floor(totalSec / 3600);
-        const mins = Math.floor((totalSec % 3600) / 60);
-        const secs = totalSec % 60;
-        
-        timer.textContent = String(hrs).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-    }
-    tick();
-    countdownInterval = setInterval(tick, 1000);
-}
-
-function computeQibla(lat, lng) {
-    const makkahLat = d2r(21.4225);
-    const makkahLng = d2r(39.8262);
-    const latRad = d2r(lat);
-    const lngRad = d2r(lng);
-    
-    const y = Math.sin(makkahLng - lngRad);
-    const x = Math.cos(latRad) * Math.tan(makkahLat) - Math.sin(latRad) * Math.cos(makkahLng - lngRad);
-    return fixAngle(r2d(Math.atan2(y, x)));
-}
-
-function haversineKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = d2r(lat2 - lat1), dLon = d2r(lon2 - lon1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(d2r(lat1))*Math.cos(d2r(lat2))*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function mosqueState(msg) {
-    const list = document.getElementById('mosque-list');
-    list.innerHTML = '';
-    const d = document.createElement('div');
-    d.className = 'm-state';
-    d.textContent = msg;
-    list.appendChild(d);
-}
-
-// ─── Mawaqit integration ────────────────────────────────────────────────────
-
-const MAWAQIT_PRAYER_NAMES_AR = ['الفجر','الظهر','العصر','المغرب','العشاء'];
-const MAWAQIT_CACHE = new Map(); // key: `${lat.toFixed(3)},${lng.toFixed(3)}`
-
-async function fetchMawaqitForMosque(lat, lon, name) {
-    const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-    if (MAWAQIT_CACHE.has(cacheKey)) return MAWAQIT_CACHE.get(cacheKey);
-
-    // Build a search query: mosque name cleaned + city from reverse geocode
-    const cleanName = name
-        .replace(/جامع|مسجد|مساجد|mosque|masjid/gi, '')
-        .replace(/[^\p{L}\d\s]/gu, '')
-        .trim()
-        .slice(0, 40);
-
-    // Use the Mawaqit neighborhood search endpoint (publicly accessible)
-    const searchUrl = `https://mawaqit.net/api/2.0/mosque/search?lat=${lat}&lon=${lon}&word=${encodeURIComponent(cleanName)}&locale=ar&limit=5`;
-    const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(searchUrl)}`;
-
-    try {
-        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) throw new Error('bad status');
-        const data = await res.json();
-        // data is an array of mosques; pick the closest one (by proximity field or index 0)
-        const mosques = Array.isArray(data) ? data : (data.mosques || []);
-        if (!mosques.length) { MAWAQIT_CACHE.set(cacheKey, null); return null; }
-        // Find the one with minimum proximity to our lat/lon
-        let best = mosques[0];
-        let bestDist = Infinity;
-        for (const m of mosques) {
-            if (m.latitude && m.longitude) {
-                const d = haversineKm(lat, lon, parseFloat(m.latitude), parseFloat(m.longitude));
-                if (d < bestDist) { bestDist = d; best = m; }
-            }
-        }
-        // Only use if within 300m of the mosque
-        if (bestDist > 0.3) { MAWAQIT_CACHE.set(cacheKey, null); return null; }
-        const result = {
-            times: best.times || [],
-            slug: best.slug || '',
-            name: best.name || '',
-            url: best.slug ? `https://mawaqit.net/fr/${best.slug}` : '',
-        };
-        MAWAQIT_CACHE.set(cacheKey, result);
-        return result;
-    } catch (e) {
-        MAWAQIT_CACHE.set(cacheKey, null);
-        return null;
-    }
-}
-
-function renderMawaqitTimes(container, data) {
-    container.innerHTML = '';
-    if (!data || !data.times || !data.times.length) {
-        const err = document.createElement('div');
-        err.className = 'mawaqit-error';
-        err.textContent = 'لم يتم العثور على مواقيت في mawaqit.net';
-        container.appendChild(err);
-        return;
-    }
-    const label = document.createElement('div'); label.className = 'mawaqit-label';
-    const logoSpan = document.createElement('span'); logoSpan.textContent = '🕌 مواقيت mawaqit.net';
-    label.appendChild(logoSpan);
-    if (data.url) {
-        const link = document.createElement('a'); link.href = data.url; link.target = '_blank'; link.rel = 'noopener';
-        link.textContent = '← صفحة المسجد';
-        label.appendChild(link);
-    }
-    container.appendChild(label);
-
-    const grid = document.createElement('div'); grid.className = 'mawaqit-grid';
-    // times is array like ['04:30','13:00','16:30','19:45','21:15'] — 5 prayers
-    const prayerTimes = data.times.slice(0, 5);
-    // Determine current prayer
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-    const timeMins = prayerTimes.map(t => {
-        const [h, m] = t.split(':').map(Number);
-        return h * 60 + m;
-    });
-    let activeIdx = -1;
-    for (let i = timeMins.length - 1; i >= 0; i--) {
-        if (nowMins >= timeMins[i]) { activeIdx = i; break; }
-    }
-
-    prayerTimes.forEach((t, i) => {
-        const cell = document.createElement('div');
-        cell.className = 'mawaqit-prayer' + (i === activeIdx ? ' current' : '');
-        const pn = document.createElement('div'); pn.className = 'mawaqit-prayer-name';
-        pn.textContent = MAWAQIT_PRAYER_NAMES_AR[i] || `ص${i+1}`;
-        const pt = document.createElement('div'); pt.className = 'mawaqit-prayer-time';
-        pt.textContent = t;
-        cell.append(pn, pt);
-        grid.appendChild(cell);
-    });
-    container.appendChild(grid);
-}
-
-async function attachMawaqitTimes(container, lat, lon, name) {
-    const mawaqitBlock = container.querySelector('.mawaqit-times');
-    if (!mawaqitBlock) return;
-    const data = await fetchMawaqitForMosque(lat, lon, name);
-    renderMawaqitTimes(mawaqitBlock, data);
-}
-
-// ─── Mosque list rendering ───────────────────────────────────────────────────
-
-function renderMosques(items, radiusKm, shown = 5, placeLabel = '', onExpand = null) {
-    const placeSuffix = placeLabel ? ` - ${placeLabel}` : '';
-    document.getElementById('zone-title').textContent = `أقرب المساجد إليكم${placeSuffix} (ضمن ${radiusKm} كم)`;
-    const list = document.getElementById('mosque-list');
-    list.innerHTML = '';
-    items.slice(0, shown).forEach((m, i) => {
-        const item = document.createElement('div'); item.className = 'mosque-item';
-
-        // Top row: rank + name/dist + map button
-        const top = document.createElement('div'); top.className = 'mosque-item-top';
-        const rank = document.createElement('div'); rank.className = 'm-rank'; rank.textContent = i + 1;
-        const info = document.createElement('div'); info.className = 'm-info';
-        const nm = document.createElement('div'); nm.className = 'm-name'; nm.textContent = m.name;
-        const ds = document.createElement('div'); ds.className = 'm-dist'; ds.textContent = `📍 ${m.dist.toFixed(1)} كم`;
-        info.append(nm, ds);
-        const btn = document.createElement('a'); btn.className = 'btn-map'; btn.target = '_blank'; btn.rel = 'noopener';
-        btn.href = `https://www.google.com/maps/search/?api=1&query=${m.lat}%2C${m.lon}`;
-        btn.textContent = 'الخريطة 📍';
-        top.append(rank, info, btn);
-
-        // Mawaqit times block (bottom row, full width)
-        const mawaqitBlock = document.createElement('div'); mawaqitBlock.className = 'mawaqit-times';
-        const loading = document.createElement('div'); loading.className = 'mawaqit-loading';
-        loading.textContent = 'جاري جلب المواقيت من mawaqit.net...';
-        mawaqitBlock.appendChild(loading);
-
-        item.append(top, mawaqitBlock);
-        list.appendChild(item);
-
-        // Async: fetch mawaqit times for this mosque
-        attachMawaqitTimes(item, m.lat, m.lon, m.name);
-    });
-    if (shown < items.length) {
-        const rem = items.length - shown;
-        const more = document.createElement('button');
-        more.className = 'load-more-btn';
-        more.textContent = `عرض 5 مساجد أخرى ··· ${rem} متبقية`;
-        more.onclick = () => renderMosques(items, radiusKm, shown + 5, placeLabel, onExpand);
-        list.appendChild(more);
-    } else if (onExpand) {
-        const more = document.createElement('button');
-        more.className = 'load-more-btn';
-        more.textContent = 'توسيع نطاق البحث عن مساجد أخرى';
-        more.onclick = onExpand;
-        list.appendChild(more);
-    }
-}
-
-function setHistoricalPlaceholder(message) {
-    const btn = document.getElementById('hist-map-btn');
-    document.getElementById('hist-name').innerText = message;
-    document.getElementById('hist-age').innerText = 'العمر: --';
-    document.getElementById('hist-city').innerText = 'المدينة: --';
-    document.getElementById('hist-desc').innerText = 'سيظهر هنا أقرب مسجد تاريخي موثق بعد الحصول على إحداثيات GPS دقيقة.';
-    btn.removeAttribute('href');
-    btn.setAttribute('aria-disabled', 'true');
-    btn.style.pointerEvents = 'none';
-    btn.style.opacity = '0.55';
-}
-
-function resetLocationView(message) {
-    appLocationSeq++;
-    mosqueSearchSeq++;
-    currentLat = null;
-    currentLng = null;
-    latestGpsPos = null;
-
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-    if (updateTimesInterval) { clearInterval(updateTimesInterval); updateTimesInterval = null; }
-
-    document.getElementById('next-prayer-name').textContent = '--';
-    document.getElementById('cd-timer').textContent = '00:00:00';
-    document.getElementById('prayer-grid').innerHTML = '';
-    document.getElementById('global-maps-link').href = '#';
-    document.getElementById('qibla-deg').innerText = '--°';
-    document.getElementById('needle').style.transform = 'translateX(-50%) rotate(0deg)';
-    document.getElementById('zone-title').textContent = 'أقرب المساجد إليكم';
-    setHistoricalPlaceholder('في انتظار تحديد GPS...');
-    resetGpsMonitor(message);
-    mosqueState(message);
-}
-
-function formatGpsAge(ms) {
-    if (!Number.isFinite(ms)) return 'العمر غير معروف';
-    if (ms < 1000) return 'الآن';
-    if (ms < 60000) return `${Math.round(ms / 1000)}ث`;
-    return `${Math.round(ms / 60000)}د`;
-}
-
-function getGpsRejectReason(pos) {
-    const coords = pos && pos.coords ? pos.coords : null;
-    if (!coords) return 'لا توجد إحداثيات';
-    const acc = coords.accuracy;
-    if (!Number.isFinite(acc)) return 'الدقة غير معروفة';
-    if (acc > GPS_REQUIRED_ACCURACY_M) return `الدقة أكبر من ${GPS_REQUIRED_ACCURACY_M}م`;
-    const ageMs = Number.isFinite(pos.timestamp) ? Math.max(0, Date.now() - pos.timestamp) : Infinity;
-    if (ageMs > GPS_MAX_FIX_AGE_MS) return `قراءة GPS قديمة (${formatGpsAge(ageMs)})`;
-    return '';
-}
-
-function isAccurateGpsPosition(pos) {
-    return getGpsRejectReason(pos) === '';
-}
-
-function setGpsMonitorText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
-}
-
-function setGpsMonitorStatus(message, level = 'warn') {
-    const el = document.getElementById('gps-monitor-status');
-    if (!el) return;
-    el.textContent = message;
-    el.className = 'gps-info-status';
-    if (level) el.classList.add(level);
-}
-
-function formatGpsAccuracy(acc) {
-    return Number.isFinite(acc) ? `${Math.round(acc)} م` : '--';
-}
-
-function formatGpsTime(ts) {
-    return ts ? new Date(ts).toLocaleTimeString('ar-TN') : '--';
-}
-
-function formatGpsCoords(coords) {
-    if (!coords) return '--';
-    return formatLatLng(coords.latitude, coords.longitude);
-}
-
-function formatLatLng(lat, lng) {
-    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-}
-
-function formatGeoPlace(geo) {
-    if (!geo) return '';
-    const parts = [geo.city, geo.state, geo.country].filter(Boolean);
-    return [...new Set(parts)].join('، ');
-}
-
-function updateGpsMonitorPlaceFromGeo(geo) {
-    setGpsMonitorText('gps-monitor-place', formatGeoPlace(geo) || 'تعذّر تحديد اسم المنطقة');
-}
-
-function updateGpsMonitorPlace(lat, lng) {
-    const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
-    if (gpsPlaceCache.has(key)) {
-        updateGpsMonitorPlaceFromGeo(gpsPlaceCache.get(key));
-        gpsPlaceLastKey = key;
-        return;
-    }
-    if (gpsPlaceLastKey === key) return;
-    gpsPlaceLastKey = key;
-    const seq = ++gpsPlaceRequestSeq;
-    setGpsMonitorText('gps-monitor-place', 'جاري تحديد اسم المنطقة...');
-    reverseGeocode(lat, lng).then(geo => {
-        gpsPlaceCache.set(key, geo);
-        if (seq === gpsPlaceRequestSeq) updateGpsMonitorPlaceFromGeo(geo);
-    });
-}
-
-function renderGpsLog() {
-    const logEl = document.getElementById('gps-log');
-    if (!logEl) return;
-    logEl.innerHTML = '';
-    gpsMonitor.log.forEach(entry => {
-        const item = document.createElement('div');
-        item.className = `gps-log-item ${entry.accepted ? 'accepted' : 'rejected'}`;
-
-        const status = document.createElement('span');
-        status.textContent = `${entry.accepted ? 'مقبول' : 'مرفوض'} · ${entry.time} · `;
-
-        const coords = document.createElement('span');
-        coords.className = 'gps-log-coords';
-        coords.textContent = entry.coords;
-
-        const meta = document.createElement('span');
-        meta.textContent = ` · دقة ${entry.accuracy} · ${entry.reason}`;
-
-        item.append(status, coords, meta);
-        logEl.appendChild(item);
-    });
-}
-
-function resetGpsMonitor(status = 'في انتظار GPS، دون IP أو موقع افتراضي') {
-    gpsMonitor = { accepted: 0, rejected: 0, lastAccepted: null, totalKm: 0, log: [] };
-    gpsPlaceRequestSeq++;
-    gpsPlaceLastKey = '';
-    setGpsMonitorText('gps-source', 'navigator.geolocation.watchPosition');
-    setGpsMonitorText('gps-request', `enableHighAccuracy=true · maximumAge=0 · accepted<=${GPS_REQUIRED_ACCURACY_M}m · age<=${GPS_MAX_FIX_AGE_MS / 1000}s`);
-    setGpsMonitorStatus(status, 'warn');
-    setGpsMonitorText('gps-monitor-coords', '--');
-    setGpsMonitorText('gps-monitor-used', '--');
-    setGpsMonitorText('gps-monitor-place', '--');
-    setGpsMonitorText('gps-monitor-accuracy', '--');
-    setGpsMonitorText('gps-monitor-time', '--');
-    setGpsMonitorText('gps-monitor-counts', '0 / 0');
-    setGpsMonitorText('gps-monitor-movement', '--');
-    renderGpsLog();
-}
-
-function recordGpsReading(pos, accepted, reason) {
-    const coords = pos.coords;
-    const timestamp = pos.timestamp || Date.now();
-    const coordsText = formatGpsCoords(coords);
-    const accuracyText = formatGpsAccuracy(coords.accuracy);
-    let movementText = '--';
-
-    if (accepted) {
-        gpsMonitor.accepted++;
-        if (gpsMonitor.lastAccepted) {
-            const movedKm = haversineKm(
-                gpsMonitor.lastAccepted.latitude,
-                gpsMonitor.lastAccepted.longitude,
-                coords.latitude,
-                coords.longitude
-            );
-            gpsMonitor.totalKm += movedKm;
-            movementText = `${Math.round(movedKm * 1000)} م من آخر نقطة · إجمالي ${gpsMonitor.totalKm.toFixed(2)} كم`;
-        } else {
-            movementText = 'أول نقطة GPS مقبولة';
-        }
-        gpsMonitor.lastAccepted = {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            accuracy: coords.accuracy,
-            timestamp,
-        };
-        setGpsMonitorStatus('مقبول: إحداثيات GPS عالية الدقة', '');
-    } else {
-        gpsMonitor.rejected++;
-        movementText = gpsMonitor.lastAccepted
-            ? `آخر نقطة مقبولة منذ ${formatGpsTime(gpsMonitor.lastAccepted.timestamp)}`
-            : 'لا توجد نقطة GPS مقبولة بعد';
-        setGpsMonitorStatus(`مرفوض: ${reason}`, 'warn');
-    }
-
-    gpsMonitor.log.unshift({
-        accepted,
-        reason,
-        coords: coordsText,
-        accuracy: accuracyText,
-        time: formatGpsTime(timestamp),
-    });
-    gpsMonitor.log = gpsMonitor.log.slice(0, GPS_LOG_LIMIT);
-
-    setGpsMonitorText('gps-monitor-coords', coordsText);
-    setGpsMonitorText('gps-monitor-accuracy', accuracyText);
-    setGpsMonitorText('gps-monitor-time', formatGpsTime(timestamp));
-    setGpsMonitorText('gps-monitor-counts', `${gpsMonitor.accepted} / ${gpsMonitor.rejected}`);
-    setGpsMonitorText('gps-monitor-movement', movementText);
-    renderGpsLog();
-}
-
-function recordManualPosition(lat, lng) {
-    gpsMonitor = { accepted: 0, rejected: 0, lastAccepted: null, totalKm: 0, log: [] };
-    setGpsMonitorText('gps-source', 'manual coordinates input');
-    setGpsMonitorText('gps-request', 'manual mode');
-    setGpsMonitorStatus('إدخال يدوي، لا توجد قراءة GPS مباشرة', 'warn');
-    setGpsMonitorText('gps-monitor-coords', formatLatLng(lat, lng));
-    setGpsMonitorText('gps-monitor-used', formatLatLng(lat, lng));
-    updateGpsMonitorPlace(lat, lng);
-    setGpsMonitorText('gps-monitor-accuracy', 'يدوي');
-    setGpsMonitorText('gps-monitor-time', formatGpsTime(Date.now()));
-    setGpsMonitorText('gps-monitor-counts', 'يدوي');
-    setGpsMonitorText('gps-monitor-movement', '--');
-    renderGpsLog();
-}
-
-function applyGpsPosition(pos, notifyOnChange = true) {
-    const coords = pos.coords;
-    const newLat = coords.latitude;
-    const newLng = coords.longitude;
-    const acc = coords.accuracy;
-    const accText = Number.isFinite(acc) ? `${Math.round(acc)}م` : 'غير معروفة';
-    const hasCurrentFix = Number.isFinite(currentLat) && Number.isFinite(currentLng);
-    const dist = hasCurrentFix ? haversineKm(currentLat, currentLng, newLat, newLng) : Infinity;
-    const ts = new Date().toLocaleTimeString('ar-TN');
-
-    if (!hasCurrentFix || dist > GPS_APPLY_DISTANCE_KM) {
-        const movementText = hasCurrentFix ? `تغيّر ${(dist * 1000).toFixed(0)}م` : 'أول تثبيت';
-        console.log(`[GPS ${ts}] ✅ تطبيق الموقع — lat: ${newLat.toFixed(6)}, lng: ${newLng.toFixed(6)}, دقة: ${accText}, ${movementText}`);
-        initApp(newLat, newLng);
-        if (hasCurrentFix && notifyOnChange) {
-            showGpsNotif(`📍 موقع جديد: ${newLat.toFixed(4)}, ${newLng.toFixed(4)} · دقة ${accText}`, true);
-        }
-        return true;
-    }
-
-    console.log(`[GPS ${ts}] 📌 الموقع ثابت — lat: ${currentLat.toFixed(6)}, lng: ${currentLng.toFixed(6)}, دقة: ${accText}, فرق: ${(dist * 1000).toFixed(1)}م`);
-    return false;
-}
-
-function mosqueViewboxForRadius(lat, lon, radiusKm) {
-    const latDelta = radiusKm / 111.32;
-    const lonDelta = radiusKm / (111.32 * Math.max(Math.cos(d2r(lat)), 0.1));
-    return `${(lon-lonDelta).toFixed(5)},${(lat-latDelta).toFixed(5)},${(lon+lonDelta).toFixed(5)},${(lat+latDelta).toFixed(5)}`;
-}
-
-async function fetchMosquesInRadius(lat, lon, radiusKm, ctrl) {
-    const vb = mosqueViewboxForRadius(lat, lon, radiusKm);
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&amenity=place_of_worship&viewbox=${vb}&bounded=1&limit=50&accept-language=ar`;
-    const res = await fetch(url, { signal: ctrl.signal });
-    if (!res.ok) throw new Error('bad status');
-    return { places: await res.json(), viewbox: vb, url };
-}
-
-async function findNearbyMosques(lat, lon, geoSource = null) {
-    const searchSeq = ++mosqueSearchSeq;
-    mosqueState('جاري البحث عن أقرب المساجد...');
-
-    const geo = geoSource ? await geoSource : await reverseGeocode(lat, lon);
-    if (searchSeq !== mosqueSearchSeq) return;
-    const placeLabel = formatGeoPlace(geo);
-
-    const NON_MOSQUE = [
-        // Arabic
-        'كنيسة','كنائس','كاتدرائية','كنيس','كنس','معبد','هيكل','دير','كابيلا','بيعة','كنيست','قديس','قديسة',
-        // English
-        'church','cathedral','chapel','synagogue','temple','monastery','convent','basilica','abbey','parish','shrine',
-        // French
-        'église','eglise','cathédrale','cathedrale','chapelle','monastère','monastere','couvent','basilique','paroisse','prieuré','prieure','abbaye',
-    ];
-
-    const normalizePlaces = places => places.map(p => {
-        const mLat = parseFloat(p.lat), mLon = parseFloat(p.lon);
-        const name = p.name || (p.display_name && p.display_name.split(',')[0].trim()) || 'مسجد';
-        return { name, lat: mLat, lon: mLon, dist: haversineKm(lat, lon, mLat, mLon) };
-    }).filter(m => {
-        const n = m.name.toLowerCase();
-        const hit = NON_MOSQUE.find(kw => n.includes(kw));
-        if (hit) { console.log(`[FILTER] تم تجاهل "${m.name}" — الكلمة: "${hit}"`); return false; }
-        return true;
-    }).sort((a, b) => a.dist - b.dist);
-
-    async function searchRadius(radiusIndex, requireResults = true) {
-        const radiusKm = MOSQUE_SEARCH_RADII_KM[radiusIndex];
-        if (!radiusKm) return false;
-        mosqueState(`جاري البحث عن المساجد ضمن ${radiusKm} كم...`);
-
-        let payload;
-        let t = null;
-        try {
-            const ctrl = new AbortController();
-            t = setTimeout(() => ctrl.abort(), 12000);
-            payload = await fetchMosquesInRadius(lat, lon, radiusKm, ctrl);
-        } catch (e) {
-            if (searchSeq !== mosqueSearchSeq) return true;
-            mosqueState('تعذّر الاتصال بخوادم الخرائط، يرجى المحاولة لاحقاً.');
-            return true;
-        } finally {
-            if (t) clearTimeout(t);
-        }
-        if (searchSeq !== mosqueSearchSeq) return true;
-
-        console.log('[MOSQUE SEARCH]', {
-            center: `${lat.toFixed(6)}, ${lon.toFixed(6)}`,
-            radiusKm,
-            viewbox: payload.viewbox,
-            place: placeLabel || 'غير محدد',
-            url: payload.url,
-        });
-
-        const items = normalizePlaces(payload.places || []).filter(m => m.dist <= radiusKm);
-        if (items.length === 0) {
-            if (requireResults) return false;
-            mosqueState(`لم يتم العثور على مساجد ضمن ${radiusKm} كم من موقعكم.`);
-            return true;
-        }
-
-        const hasNextRadius = radiusIndex < MOSQUE_SEARCH_RADII_KM.length - 1;
-        renderMosques(
-            items,
-            radiusKm,
-            5,
-            placeLabel,
-            hasNextRadius ? () => searchRadius(radiusIndex + 1, false) : null
-        );
-        return true;
-    }
-
-    for (let i = 0; i < MOSQUE_SEARCH_RADII_KM.length; i++) {
-        if (await searchRadius(i)) return;
-    }
-
-    const maxRadius = MOSQUE_SEARCH_RADII_KM[MOSQUE_SEARCH_RADII_KM.length - 1];
-    mosqueState(`لم يتم العثور على مساجد ضمن ${maxRadius} كم من موقعكم.`);
-}
-
-async function reverseGeocode(lat, lon) {
-    try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);
-        if (!res.ok) throw new Error('bad status');
-        const data = await res.json();
-        if(data && data.address) {
-            const countryCode = data.address.country_code ? data.address.country_code.toUpperCase() : "";
-            const city = data.address.city || data.address.town || data.address.village || data.address.state || "";
-            const state = data.address.state || data.address.region || "";
-            const country = data.address.country || "";
-            return { countryCode, city, state, country };
-        }
-    } catch(e) { console.error(e); }
-    return { countryCode: "", city: "", state: "", country: "" };
-}
-
-function updateHistoricalCard(lat, lng) {
-    const nameEl = document.getElementById('hist-name');
-    const ageEl = document.getElementById('hist-age');
-    const cityEl = document.getElementById('hist-city');
-    const descEl = document.getElementById('hist-desc');
-    const btn = document.getElementById('hist-map-btn');
-
-    const match = historicalMosquesDB
-        .filter(m => Number.isFinite(m.latitude) && Number.isFinite(m.longitude))
-        .map(m => ({ ...m, dist: haversineKm(lat, lng, m.latitude, m.longitude) }))
-        .sort((a, b) => a.dist - b.dist)[0];
-
-    if (!match) {
-        setHistoricalPlaceholder('لا توجد إحداثيات مؤكدة للمساجد التاريخية');
-        return;
-    }
-
-    nameEl.innerText = match.name;
-    ageEl.innerText = `العمر: ${match.estimatedAgeYearsIn2026} سنة`;
-    cityEl.innerText = `${match.city} · ${match.dist.toFixed(1)} كم`;
-    descEl.innerText = match.description;
-    btn.href = `https://www.google.com/maps/search/?api=1&query=${match.latitude},${match.longitude}`;
-    btn.removeAttribute('aria-disabled');
-    btn.style.pointerEvents = '';
-    btn.style.opacity = '';
-}
-
-function initApp(lat, lng) {
-    const appSeq = ++appLocationSeq;
-    currentLat = lat;
-    currentLng = lng;
-    
-    const isManual = document.getElementById('pos-mode-select').value === 'manual';
-    document.getElementById('gps-txt').innerText = isManual
-        ? `موقع يدوي: ${lat.toFixed(4)}, ${lng.toFixed(4)}`
-        : `GPS نشط: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    setGpsMonitorText('gps-monitor-used', formatLatLng(lat, lng));
-    document.getElementById('global-maps-link').href = `https://www.google.com/maps/search/?api=1&query=mosque&center=${lat},${lng}`;
-    
-    // حساب وعرض اتجاه القبلة وحركة إبرة البوصلة
-    const qiblaAngle = computeQibla(lat, lng);
-    document.getElementById('qibla-deg').innerText = `${Math.round(qiblaAngle)}°`;
-    document.getElementById('needle').style.transform = `translateX(-50%) rotate(${qiblaAngle}deg)`;
-    
-    const select = document.getElementById('method-select');
-    const updateTimes = () => {
-        const tz = -new Date().getTimezoneOffset()/60;
-        const now = new Date();
-        const nowH = now.getHours() + now.getMinutes()/60 + now.getSeconds()/3600;
-        const prayers = computePrayers(currentLat, currentLng, tz, select.value, now);
-        renderPrayers(prayers, nowH);
-        startCountdown(prayers);
-    };
-    
-    select.onchange = updateTimes;
-    updateTimes();
-    if (updateTimesInterval) clearInterval(updateTimesInterval);
-    updateTimesInterval = setInterval(updateTimes, 60000);
-
-    const geoPromise = reverseGeocode(lat, lng);
-    findNearbyMosques(lat, lng, geoPromise);
-
-    // تفتيش قاعدة البيانات التاريخية للمعالم
-    geoPromise.then(geo => {
-        if (appSeq !== appLocationSeq) return;
-        updateHistoricalCard(lat, lng);
-        updateGpsMonitorPlaceFromGeo(geo);
-        if (document.getElementById('pos-mode-select').value === 'manual') {
-            const info = document.getElementById('manual-location-info');
-            const parts = [geo.city, geo.state, geo.country].filter(Boolean);
-            if (parts.length > 0) {
-                info.textContent = '📍 ' + parts.join('، ');
-                info.style.display = 'block';
-            } else {
-                info.style.display = 'none';
-            }
-        }
-    });
-}
-
-window.onload = function() {
-    document.getElementById('hijri-date').innerText = getHijriDate();
-
-
-    const posModeSelect = document.getElementById('pos-mode-select');
-    const manualPanel   = document.getElementById('manual-pos-panel');
-    const applyBtn      = document.getElementById('apply-pos-btn');
-    const posError      = document.getElementById('pos-error');
-
-    function startGPS() {
-        if (gpsTrackInterval) { clearInterval(gpsTrackInterval); gpsTrackInterval = null; }
-        if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-        resetLocationView('في انتظار إحداثيات GPS دقيقة...');
-
-        if (SIM_MODE) {
-            document.getElementById('sim-panel').style.display = 'block';
-            setGpsMonitorText('gps-source', 'simulation_test route');
-            setGpsMonitorText('gps-request', 'محاكاة داخلية لاختبار التتبع');
-            simSegIdx = 0; simSegDist = 0;
-            const [sLat, sLng] = SIM_ROUTE[0];
-            latestGpsPos = { coords: { latitude: sLat, longitude: sLng, accuracy: 15 }, timestamp: Date.now() };
-            recordGpsReading(latestGpsPos, true, 'محاكاة اختبار');
-            initApp(sLat, sLng);
-            updateSimPanel(sLat, sLng);
-            console.log('[SIM] انطلقت من تونس باتجاه نابل · كل 5 ثوانٍ = ~69م');
-
-            function simApplyPos(lat, lng, done) {
-                latestGpsPos = { coords: { latitude: lat, longitude: lng, accuracy: 15 }, timestamp: Date.now() };
-                recordGpsReading(latestGpsPos, true, done ? 'محاكاة: الوصول' : 'محاكاة: نقطة جديدة');
-                if (done) {
-                    initApp(lat, lng);
-                    updateSimPanel(lat, lng);
-                    document.getElementById('sim-location-name').textContent = '🏁 وصلت إلى نابل!';
-                    showGpsNotif('🏁 وصلت إلى نابل!', true);
-                    if (gpsTrackInterval) { clearInterval(gpsTrackInterval); gpsTrackInterval = null; }
-                    return;
-                }
-                const dist = haversineKm(currentLat, currentLng, lat, lng);
-                updateSimPanel(lat, lng);
-                const ts = new Date().toLocaleTimeString('ar-TN');
-                const remKm = haversineKm(lat, lng, SIM_DEST[0], SIM_DEST[1]);
-                if (dist > GPS_APPLY_DISTANCE_KM) {
-                    console.log(`[SIM ${ts}] ✅ موقع جديد — lat: ${lat.toFixed(6)}, lng: ${lng.toFixed(6)}, متبقي: ${remKm.toFixed(1)} كم`);
-                    initApp(lat, lng);
-                    showGpsNotif(`📍 موقع جديد: ${lat.toFixed(4)}, ${lng.toFixed(4)} · متبقي: ${remKm.toFixed(1)} كم`, true);
-                } else {
-                    console.log(`[SIM ${ts}] 📌 الموقع ثابت — متبقي: ${remKm.toFixed(1)} كم`);
-                    showGpsNotif(`📌 الموقع ثابت · متبقي: ${remKm.toFixed(1)} كم`, false);
-                }
-            }
-
-            const KM_PER_TICK = SIM_SPEED_KMH * 5 / 3600;
-            gpsTrackInterval = setInterval(() => {
-                if (document.getElementById('pos-mode-select').value !== 'auto') return;
-                const { lat, lng, done } = simAdvance(KM_PER_TICK);
-                simApplyPos(lat, lng, done);
-            }, 5000);
-
-            document.getElementById('sim-skip-btn').onclick = () => {
-                const km = parseFloat(document.getElementById('sim-skip-km').value) || 3;
-                const { lat, lng, done } = simAdvance(km);
-                simApplyPos(lat, lng, done);
-            };
-
-            return;
-        }
-
-        if (!navigator.geolocation) {
-            document.getElementById('gps-txt').textContent = '⚠️ المتصفح لا يدعم تحديد الموقع — يرجى استخدام متصفح حديث';
-            document.getElementById('gps-txt').style.color = '#e06060';
-            setGpsMonitorStatus('المتصفح لا يدعم Geolocation API', 'error');
-            mosqueState('⚠️ المتصفح لا يدعم تحديد الموقع');
-            return;
-        }
-
-        document.getElementById('gps-txt').textContent = '📡 جاري تحديد موقعك...';
-        document.getElementById('gps-txt').style.color = '';
-        setGpsMonitorStatus('طلب GPS عالي الدقة من المتصفح...', 'warn');
-
-        function showGpsError(err) {
-            const msgs = {
-                1: '⚠️ لم يتم منح إذن الموقع — يرجى السماح للمتصفح بالوصول إلى موقعك',
-                2: '⚠️ تعذّر تحديد الموقع — قد يكون GPS متوقفاً أو الإشارة ضعيفة',
-                3: '⚠️ انتهت مهلة GPS — لن يتم استخدام موقع افتراضي',
-            };
-            const msg = (err && msgs[err.code]) || '⚠️ فشل تحديد الموقع';
-            document.getElementById('gps-txt').textContent = msg;
-            document.getElementById('gps-txt').style.color = '#e06060';
-            setGpsMonitorStatus(msg, 'error');
-            mosqueState(msg);
-        }
-
-        let initialized = false;
-        gpsWatchId = navigator.geolocation.watchPosition(pos => {
-            const acc = pos.coords.accuracy;
-            const rejectReason = getGpsRejectReason(pos);
-            if (rejectReason) {
-                const accText = Number.isFinite(acc) ? `${Math.round(acc)}م` : 'غير معروفة';
-                const msg = `📡 تم تجاهل قراءة GPS (${accText}) — ${rejectReason}`;
-                recordGpsReading(pos, false, rejectReason);
-                document.getElementById('gps-txt').textContent = msg;
-                document.getElementById('gps-txt').style.color = '#d4a017';
-                if (!initialized) mosqueState('في انتظار إشارة GPS دقيقة...');
-                console.warn(`[GPS] تم تجاهل القراءة: ${rejectReason}`);
-                return;
-            }
-            latestGpsPos = pos;
-            recordGpsReading(pos, true, `الدقة ضمن ${GPS_REQUIRED_ACCURACY_M}م والقراءة حديثة`);
-            applyGpsPosition(pos, initialized);
-            initialized = true;
-        }, err => {
-            if (!initialized || (err && err.code === 1)) {
-                showGpsError(err);
-            } else {
-                console.warn('[GPS] خطأ مؤقت بعد تحديد الموقع:', err);
-            }
-            if (err && err.code === 1) {
-                initialized = true;
-                if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-                if (gpsTrackInterval) { clearInterval(gpsTrackInterval); gpsTrackInterval = null; }
-            }
-        }, GPS_OPTIONS);
-
-    }
-
-    function applyManual() {
-        const raw = document.getElementById('manual-coords').value.trim();
-        posError.style.display = 'none';
-        const parts = raw.split(',');
-        const lat = parseFloat(parts[0]);
-        const lon = parseFloat(parts[1]);
-        if (parts.length < 2 || isNaN(lat) || lat < -90 || lat > 90 || isNaN(lon) || lon < -180 || lon > 180) {
-            posError.textContent = 'يرجى إدخال إحداثيات صحيحة — مثال: 36.450354, 10.731993';
-            posError.style.display = 'block';
-            return;
-        }
-        recordManualPosition(lat, lon);
-        initApp(lat, lon);
-    }
-
-    posModeSelect.onchange = function() {
-        if (this.value === 'manual') {
-            document.getElementById('manual-coords').value = Number.isFinite(currentLat) && Number.isFinite(currentLng)
-                ? `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`
-                : '';
-            if (Number.isFinite(currentLat) && Number.isFinite(currentLng)) {
-                recordManualPosition(currentLat, currentLng);
-            } else {
-                setGpsMonitorStatus('الوضع اليدوي: أدخل الإحداثيات بنفسك', 'warn');
-            }
-            manualPanel.style.display = 'flex';
-        } else {
-            manualPanel.style.display = 'none';
-            document.getElementById('manual-location-info').style.display = 'none';
-            if (gpsTrackInterval) { clearInterval(gpsTrackInterval); gpsTrackInterval = null; }
-            if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-            startGPS();
-        }
-    };
-
-    applyBtn.onclick = applyManual;
-
-    startGPS();
-};
-
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-            console.warn('Service worker registration failed:', err);
-        });
-    });
-}
+function showNotif(text,changed){Toastify({text,duration:4000,gravity:'bottom',position:'right',stopOnFocus:false,style:{background:changed?'rgba(212,175,55,0.92)':'rgba(40,28,12,0.95)',color:changed?'#1a1208':'#a8946a',border:changed?'1px solid #d4af37':'1px solid rgba(168,148,106,0.3)',borderRadius:'10px',fontFamily:"'Cairo',sans-serif",fontSize:'13px',fontWeight:'600',padding:'10px 16px',direction:'rtl'}}).showToast();}
+function sunPosition(jd){const D=jd-2451545.0;const g=fixAngle(357.529+0.98560028*D);const q=fixAngle(280.459+0.98564736*D);const L=fixAngle(q+1.915*Math.sin(d2r(g))+0.020*Math.sin(d2r(2*g)));const e=23.439-0.00000036*D;const RA=r2d(Math.atan2(Math.cos(d2r(e))*Math.sin(d2r(L)),Math.cos(d2r(L))))/15;const dec=r2d(Math.asin(Math.sin(d2r(e))*Math.sin(d2r(L))));const EqT=q/15-fixHour(RA);return{dec,EqT};}
+function julianDate(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100);const B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+function computeHours(lat,lng,tz,date=new Date()){const y=date.getFullYear(),m=date.getMonth()+1,d=date.getDate();const jd=julianDate(y,m,d);const{dec,EqT}=sunPosition(jd);const Dhuhr=12+tz-lng/15-EqT;function ha(alpha,dir){const latR=d2r(lat),decR=d2r(dec);const cosH=(Math.sin(d2r(alpha))-Math.sin(latR)*Math.sin(decR))/(Math.cos(latR)*Math.cos(decR));if(cosH>1||cosH<-1)return null;const h=r2d(Math.acos(cosH))/15;return dir==='rise'?Dhuhr-h:Dhuhr+h;}const sunrise=ha(-0.833,'rise'),sunset=ha(-0.833,'set');return COPTIC_HOURS.map(o=>{let t;if(o.type==='sunrise')t=sunrise;else if(o.type==='sunset')t=sunset;else t=o.h;return{name:o.name,icon:o.icon,time:t,fmt:fmtH(t)};});}
+function fmtH(h){if(h===null||isNaN(h))return'--:--';h=fixHour(h);let mTotal=Math.round((h-Math.floor(h))*60);let hr=Math.floor(h),mn=mTotal;if(mn===60){mn=0;hr=(hr+1)%24;}return String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0');}
+function getCopticDate(){const months=['توت','بابه','هاتور','كيهك','طوبة','أمشير','برمهات','برمودة','بشنس','بؤونة','أبيب','مسرى','النسيء'];const now=new Date();const gYear=now.getFullYear();const newYear=new Date(gYear,8,11);let copticYear=gYear-284,diff;if(now>=newYear){diff=Math.floor((now-newYear)/(1000*60*60*24));}else{const prevNY=new Date(gYear-1,8,11);diff=Math.floor((now-prevNY)/(1000*60*60*24));copticYear=gYear-1-284;}const monthIdx=Math.floor(diff/30);const day=(diff%30)+1;return `${day} ${months[Math.min(monthIdx,12)]} ${copticYear} ش`;}
+function renderHours(hours,nowH){const g1=document.getElementById('prayer-grid'),g2=document.getElementById('prayer-grid2');g1.innerHTML='';g2.innerHTML='';let nextIdx=-1;for(let i=0;i<hours.length;i++){if(hours[i].time!==null&&fixHour(hours[i].time)>nowH){nextIdx=i;break;}}if(nextIdx===-1)nextIdx=0;hours.forEach((p,i)=>{const div=document.createElement('div');div.className='p-item'+(i===nextIdx?' active':'');div.innerHTML=`<div class="p-name">${p.icon} ${p.name}</div><div class="p-time">${p.fmt}</div>`;(i<4?g1:g2).appendChild(div);});return nextIdx;}
+function startCountdown(hours){if(countdownInterval)clearInterval(countdownInterval);const timer=document.getElementById('cd-timer'),nameEl=document.getElementById('next-prayer-name');function tick(){const now=new Date();const nowH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;let idx=-1;for(let i=0;i<hours.length;i++){if(hours[i].time!==null&&fixHour(hours[i].time)>nowH){idx=i;break;}}let nextDay=false;if(idx===-1){idx=0;nextDay=true;}const next=hours[idx];if(!next||next.time===null){timer.textContent='--:--:--';return;}nameEl.textContent='صلاة '+next.name+(nextDay?' (غداً)':'');let diff=fixHour(next.time)-nowH;if(nextDay)diff=(24-nowH)+fixHour(next.time);const totalSec=Math.max(0,Math.floor(diff*3600));const hrs=Math.floor(totalSec/3600),mins=Math.floor((totalSec%3600)/60),secs=totalSec%60;timer.textContent=String(hrs).padStart(2,'0')+':'+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');}tick();countdownInterval=setInterval(tick,1000);}
+function haversineKm(a,b,c,e){const R=6371,dL=d2r(c-a),dO=d2r(e-b),x=Math.sin(dL/2)**2+Math.cos(d2r(a))*Math.cos(d2r(c))*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function mosqueState(msg){const l=document.getElementById('mosque-list');l.innerHTML='';const d=document.createElement('div');d.className='m-state';d.textContent=msg;l.appendChild(d);}
+function renderChurches(items,radiusKm,shown=5,placeLabel='',onExpand=null){const sfx=placeLabel?` - ${placeLabel}`:'';document.getElementById('zone-title').textContent=`أقرب الكنائس${sfx} (ضمن ${radiusKm} كم)`;const list=document.getElementById('mosque-list');list.innerHTML='';items.slice(0,shown).forEach((m,i)=>{const item=document.createElement('div');item.className='mosque-item';const rank=document.createElement('div');rank.className='m-rank';rank.textContent=i+1;const info=document.createElement('div');info.className='m-info';const nm=document.createElement('div');nm.className='m-name';nm.textContent=m.name;const ds=document.createElement('div');ds.className='m-dist';ds.textContent=`📍 ${m.dist.toFixed(1)} كم`;info.append(nm,ds);const btn=document.createElement('a');btn.className='btn-map';btn.target='_blank';btn.rel='noopener';btn.href=`https://www.google.com/maps/search/?api=1&query=${m.lat}%2C${m.lon}`;btn.textContent='الخريطة 📍';item.append(rank,info,btn);list.appendChild(item);});if(shown<items.length){const rem=items.length-shown;const more=document.createElement('button');more.className='load-more-btn';more.textContent=`عرض 5 كنائس أخرى ··· ${rem} متبقية`;more.onclick=()=>renderChurches(items,radiusKm,shown+5,placeLabel,onExpand);list.appendChild(more);}else if(onExpand){const more=document.createElement('button');more.className='load-more-btn';more.textContent='توسيع نطاق البحث عن كنائس أخرى';more.onclick=onExpand;list.appendChild(more);}}
+function setHistPlaceholder(msg){const btn=document.getElementById('hist-map-btn');document.getElementById('hist-name').innerText=msg;document.getElementById('hist-age').innerText='العمر: --';document.getElementById('hist-city').innerText='المدينة: --';document.getElementById('hist-desc').innerText='سيظهر هنا أقرب كنيسة أو دير قبطي تاريخي بعد تحديد GPS.';btn.removeAttribute('href');btn.style.pointerEvents='none';btn.style.opacity='0.55';}
+function viewbox(lat,lon,r){const lD=r/111.32,oD=r/(111.32*Math.max(Math.cos(d2r(lat)),0.1));return`${(lon-oD).toFixed(5)},${(lat-lD).toFixed(5)},${(lon+oD).toFixed(5)},${(lat+lD).toFixed(5)}`;}
+async function fetchChurches(lat,lon,r,ctrl){const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&amenity=place_of_worship&viewbox=${viewbox(lat,lon,r)}&bounded=1&limit=50&accept-language=ar`;const res=await fetch(url,{signal:ctrl.signal});if(!res.ok)throw new Error('err');return res.json();}
+async function reverseGeocode(lat,lon){try{const res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);if(!res.ok)throw new Error('');const d=await res.json();if(d&&d.address){const city=d.address.city||d.address.town||d.address.village||d.address.state||'';const state=d.address.state||'';const country=d.address.country||'';return{city,state,country};}}catch(e){}return{city:'',state:'',country:''};}
+function fmtPlace(g){if(!g)return'';return[...new Set([g.city,g.state,g.country].filter(Boolean))].join('، ');}
+async function findChurches(lat,lon,geoSource=null){const seq=++mosqueSearchSeq;mosqueState('جاري البحث عن أقرب الكنائس...');const geo=geoSource?await geoSource:await reverseGeocode(lat,lon);if(seq!==mosqueSearchSeq)return;const label=fmtPlace(geo);const NON_CHURCH=['mosque','مسجد','جامع','مصلى','synagogue','كنيس يهودي','معبد يهودي','temple','معبد','هندوس','بوذي','سيخ','بوذية'];const norm=places=>places.map(p=>{const mL=parseFloat(p.lat),mO=parseFloat(p.lon);const n=p.name||(p.display_name&&p.display_name.split(',')[0].trim())||'كنيسة';return{name:n,lat:mL,lon:mO,dist:haversineKm(lat,lon,mL,mO)};}).filter(m=>{const n=m.name.toLowerCase();if(NON_CHURCH.some(kw=>n.includes(kw)))return false;return true;}).sort((a,b)=>a.dist-b.dist);async function tryR(idx,req=true){const r=RADII[idx];if(!r)return false;mosqueState(`جاري البحث ضمن ${r} كم...`);let payload,t=null;try{const ctrl=new AbortController();t=setTimeout(()=>ctrl.abort(),12000);payload=await fetchChurches(lat,lon,r,ctrl);}catch(e){if(seq!==mosqueSearchSeq)return true;mosqueState('تعذّر الاتصال بالخوادم، حاول لاحقاً.');return true;}finally{if(t)clearTimeout(t);}if(seq!==mosqueSearchSeq)return true;const items=norm(payload||[]).filter(m=>m.dist<=r);if(!items.length){if(req)return false;mosqueState(`لم يتم العثور على كنائس ضمن ${r} كم.`);return true;}const hasNext=idx<RADII.length-1;renderChurches(items,r,5,label,hasNext?()=>tryR(idx+1,false):null);return true;}for(let i=0;i<RADII.length;i++){if(await tryR(i))return;}mosqueState('لم يتم العثور على كنائس في هذه المنطقة.');}
+function updateHistorical(lat,lng){const match=historicalDB.filter(m=>Number.isFinite(m.lat)&&Number.isFinite(m.lon)).map(m=>({...m,dist:haversineKm(lat,lng,m.lat,m.lon)})).sort((a,b)=>a.dist-b.dist)[0];if(!match){setHistPlaceholder('لا توجد إحداثيات مؤكدة');return;}document.getElementById('hist-name').innerText=match.name;document.getElementById('hist-age').innerText=`العمر: ${match.age} سنة`;document.getElementById('hist-city').innerText=`${match.city} · ${match.dist.toFixed(1)} كم`;document.getElementById('hist-desc').innerText=match.desc;const btn=document.getElementById('hist-map-btn');btn.href=`https://www.google.com/maps/search/?api=1&query=${match.lat},${match.lon}`;btn.style.pointerEvents='';btn.style.opacity='';}
+function initApp(lat,lng){const seq=++appLocationSeq;currentLat=lat;currentLng=lng;const isManual=document.getElementById('pos-mode-select').value==='manual';document.getElementById('gps-txt').innerText=isManual?`موقع يدوي: ${lat.toFixed(4)}, ${lng.toFixed(4)}`:`GPS نشط: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;document.getElementById('global-maps-link').href=`https://www.google.com/maps/search/?api=1&query=church&center=${lat},${lng}`;document.getElementById('qibla-deg').innerText='90° شرقاً';document.getElementById('needle').style.transform='translateX(-50%) rotate(90deg)';const updateTimes=()=>{const tz=-new Date().getTimezoneOffset()/60;const now=new Date();const nowH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;const hours=computeHours(currentLat,currentLng,tz,now);renderHours(hours,nowH);startCountdown(hours);};updateTimes();if(updateTimesInterval)clearInterval(updateTimesInterval);updateTimesInterval=setInterval(updateTimes,60000);const geoPromise=reverseGeocode(lat,lng);findChurches(lat,lng,geoPromise);geoPromise.then(geo=>{if(seq!==appLocationSeq)return;updateHistorical(lat,lng);if(document.getElementById('pos-mode-select').value==='manual'){const info=document.getElementById('manual-location-info');const parts=[geo.city,geo.state,geo.country].filter(Boolean);if(parts.length){info.textContent='📍 '+parts.join('، ');info.style.display='block';}else info.style.display='none';}});}
+function isGoodGps(p){if(!p||!p.coords)return false;const acc=p.coords.accuracy;if(!Number.isFinite(acc)||acc>GPS_ACC)return false;const age=Number.isFinite(p.timestamp)?Math.max(0,Date.now()-p.timestamp):Infinity;return age<=GPS_AGE;}
+function applyGps(pos,notify=true){const{latitude:nl,longitude:no,accuracy:acc}=pos.coords;const at=Number.isFinite(acc)?`${Math.round(acc)}م`:'?';const has=Number.isFinite(currentLat)&&Number.isFinite(currentLng);const dist=has?haversineKm(currentLat,currentLng,nl,no):Infinity;if(!has||dist>GPS_DIST){initApp(nl,no);if(has&&notify)showNotif(`📍 موقع جديد: ${nl.toFixed(4)}, ${no.toFixed(4)} · دقة ${at}`,true);return true;}return false;}
+window.onload=function(){document.getElementById('coptic-date').innerText=getCopticDate();const sel=document.getElementById('pos-mode-select'),panel=document.getElementById('manual-pos-panel'),btn=document.getElementById('apply-pos-btn'),err=document.getElementById('pos-error');function startGPS(){if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}currentLat=null;currentLng=null;document.getElementById('gps-txt').textContent='📡 جاري تحديد موقعك...';mosqueState('في انتظار إحداثيات GPS دقيقة...');if(!navigator.geolocation){document.getElementById('gps-txt').textContent='⚠️ المتصفح لا يدعم تحديد الموقع';mosqueState('⚠️ المتصفح لا يدعم GPS');return;}let init=false;gpsWatchId=navigator.geolocation.watchPosition(pos=>{if(!isGoodGps(pos)){const acc=pos.coords?Math.round(pos.coords.accuracy):'?';document.getElementById('gps-txt').textContent=`📡 انتظار إشارة دقيقة... (${acc}م)`;if(!init)mosqueState('في انتظار إشارة GPS دقيقة...');return;}applyGps(pos,init);init=true;},err2=>{const msgs={1:'⚠️ لم يُمنح إذن الموقع — فعّل الموقع في المتصفح',2:'⚠️ تعذّر تحديد الموقع',3:'⚠️ انتهت مهلة GPS'};const msg=(err2&&msgs[err2.code])||'⚠️ فشل تحديد الموقع';document.getElementById('gps-txt').textContent=msg;mosqueState(msg);if(err2&&err2.code===1&&gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}},GPS_OPT);}function applyManual(){const raw=document.getElementById('manual-coords').value.trim();err.style.display='none';const parts=raw.split(',');const lat=parseFloat(parts[0]),lon=parseFloat(parts[1]);if(parts.length<2||isNaN(lat)||lat<-90||lat>90||isNaN(lon)||lon<-180||lon>180){err.textContent='إحداثيات غير صحيحة — مثال: 30.044420, 31.235712';err.style.display='block';return;}initApp(lat,lon);}sel.onchange=function(){if(this.value==='manual'){if(Number.isFinite(currentLat)&&Number.isFinite(currentLng))document.getElementById('manual-coords').value=`${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;panel.style.display='flex';if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}}else{panel.style.display='none';document.getElementById('manual-location-info').style.display='none';startGPS();}};btn.onclick=applyManual;document.getElementById('manual-coords').addEventListener('keydown',e=>{if(e.key==='Enter')applyManual();});startGPS();};
 </script>
 </body>
 </html>
